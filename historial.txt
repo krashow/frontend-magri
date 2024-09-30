@@ -2,3 +2,4 @@
 2024-09-30 11:30:00 - chore: Instalación y configuración de dependencias (Router, Axios).
 2024-09-30 14:00:00 - style: Incorporación de librería de íconos (Font Awesome) y estilos globales.
 2024-09-30 16:30:00 - feat(auth): Creación del componente Login.vue con formulario básico.
+2024-09-30 18:00:00 - refactor(router): Definición de rutas protegidas y públicas iniciales.
