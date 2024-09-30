@@ -1,1 +1,2 @@
 2024-09-30 09:00:00 - feat: Inicialización del proyecto Vue 3 con Vite. Estructura base de carpetas.
+2024-09-30 11:30:00 - chore: Instalación y configuración de dependencias (Router, Axios).
