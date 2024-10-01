@@ -4,3 +4,4 @@
 2024-09-30 16:30:00 - feat(auth): Creación del componente Login.vue con formulario básico.
 2024-09-30 18:00:00 - refactor(router): Definición de rutas protegidas y públicas iniciales.
 2024-10-01 09:30:00 - feat(layout): Creación del componente Dashboard.vue (Layout principal).
+2024-10-01 12:00:00 - style(sidebar): Implementación del sidebar y menú de navegación.
