@@ -12,3 +12,4 @@
 2024-10-02 11:45:00 - feat(api): Servicio Axios para consumir endpoint /incidencias/responsable/asignadas.
 2024-10-02 14:15:00 - feat(table): Maquetación de la tabla de incidencias con placeholders.
 2024-10-02 16:30:00 - style(table): Estilización de la tabla, filas y cabeceras. Clases de estado.
+2024-10-02 18:00:00 - fix(data): Manejo de errores 404 y estados de carga en Incidencias.vue.
