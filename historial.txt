@@ -11,3 +11,4 @@
 2024-10-02 09:00:00 - feat(page): Creación de la vista Incidencias.vue para listar.
 2024-10-02 11:45:00 - feat(api): Servicio Axios para consumir endpoint /incidencias/responsable/asignadas.
 2024-10-02 14:15:00 - feat(table): Maquetación de la tabla de incidencias con placeholders.
+2024-10-02 16:30:00 - style(table): Estilización de la tabla, filas y cabeceras. Clases de estado.
