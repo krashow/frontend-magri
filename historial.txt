@@ -17,3 +17,4 @@
 2024-10-03 11:00:00 - feat(modal): Lógica de apertura y cierre del modal al hacer clic en 'Gestionar'.
 2024-10-03 13:45:00 - feat(tabs): Implementación de la navegación por pestañas dentro del modal.
 2024-10-03 16:00:00 - feat(detail): Contenido de la pestaña 'Vista General' con datos de incidencia.
+2024-10-03 17:30:00 - style(modal): Estilos para el overlay, el cuerpo del modal y las pestañas.
