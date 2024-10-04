@@ -19,3 +19,4 @@
 2024-10-03 16:00:00 - feat(detail): Contenido de la pestaña 'Vista General' con datos de incidencia.
 2024-10-03 17:30:00 - style(modal): Estilos para el overlay, el cuerpo del modal y las pestañas.
 2024-10-04 09:45:00 - feat(tracking): Estructura inicial de la pestaña 'Seguimiento'.
+2024-10-04 12:15:00 - feat(timeline): Diseño de la línea de tiempo (timeline) para registros de actividad.
