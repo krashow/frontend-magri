@@ -21,3 +21,4 @@
 2024-10-04 09:45:00 - feat(tracking): Estructura inicial de la pestaña 'Seguimiento'.
 2024-10-04 12:15:00 - feat(timeline): Diseño de la línea de tiempo (timeline) para registros de actividad.
 2024-10-04 14:00:00 - feat(form): Formulario para añadir nuevo seguimiento: textarea y selector de estado.
+2024-10-04 16:30:00 - feat(sim): Implementación de la simulación de agregar registro de seguimiento.
