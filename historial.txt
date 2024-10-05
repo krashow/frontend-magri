@@ -27,3 +27,4 @@
 2024-10-05 11:30:00 - fix(data): Asegurar la copia profunda del objeto incidencia al abrir el modal.
 2024-10-05 14:00:00 - style(badges): Refinar colores y estilos de las etiquetas de estado (badges).
 2024-10-05 16:15:00 - feat(feedback): Añadir mensajes de alerta simulados después de registrar seguimiento.
+2024-10-05 17:45:00 - chore(cleanup): Eliminar código obsoleto y comentarios de prueba.
