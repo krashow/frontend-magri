@@ -25,3 +25,4 @@
 2024-10-04 18:00:00 - feat(sim): Lógica para actualizar el estado principal de la incidencia desde el modal.
 2024-10-05 09:00:00 - refactor: Mover funciones de formato de fecha a un archivo utility compartido.
 2024-10-05 11:30:00 - fix(data): Asegurar la copia profunda del objeto incidencia al abrir el modal.
+2024-10-05 14:00:00 - style(badges): Refinar colores y estilos de las etiquetas de estado (badges).
