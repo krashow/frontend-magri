@@ -31,3 +31,4 @@
 2024-10-06 09:30:00 - feat(register): Creación de la vista RegistrarIncidencia.vue.
 2024-10-06 12:00:00 - feat(form): Maquetación del formulario con campos de usuario, área y descripción.
 2024-10-06 14:30:00 - feat(api): Implementación de la función de envío de datos vía POST a la API.
+2024-10-06 16:45:00 - feat(validation): Validación básica del formulario de registro (campos obligatorios).
