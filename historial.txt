@@ -34,3 +34,4 @@
 2024-10-06 16:45:00 - feat(validation): Validación básica del formulario de registro (campos obligatorios).
 2024-10-06 18:00:00 - style(form): Estilos limpios y responsivos para el formulario de registro.
 2024-10-07 09:15:00 - feat(report): Creación de la vista Reportes.vue (Estructura de la página).
+2024-10-07 11:30:00 - chore(dependencies): Instalación de una librería de gráficos ligera (ej. Chart.js o similar).
