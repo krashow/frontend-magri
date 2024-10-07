@@ -37,3 +37,4 @@
 2024-10-07 11:30:00 - chore(dependencies): Instalación de una librería de gráficos ligera (ej. Chart.js o similar).
 2024-10-07 14:00:00 - feat(report): Componente de gráfico de estado por categoría (datos simulados).
 2024-10-07 16:30:00 - docs: Actualización del README.md con instrucciones de setup del frontend.
+2024-10-07 18:00:00 - build: Ajustes finales en la configuración de build y preparación para despliegue.
