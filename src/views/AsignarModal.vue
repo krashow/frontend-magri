@@ -103,7 +103,6 @@ export default {
         let mensaje = "No se pudieron cargar los responsables. ";
 
         if (error.response && error.response.status === 403) {
-             // 403 para la carga de responsables
              mensaje += "Acceso denegado (Error 403). Confirma que la seguridad de Spring Boot permite la ruta /api/usuarios/responsables sin autenticar.";
         } else if (error.response && error.response.status === 404) {
              mensaje += "Ruta no encontrada (Error 404). Verifica que el endpoint `/api/usuarios/responsables` exista y que el puerto sea `8081`.";
@@ -140,14 +139,10 @@ export default {
         const response = await axios.post(endpoint, asignacionData);
 
         const incidenciaActualizada = response.data;
-
-        // --- MODIFICACIÓN CLAVE AQUÍ ---
-        // 1. Emitir mensaje de éxito ANTES de cerrar el modal
         this.$emit(
           "mensajeGlobal", 
           `Incidencia #${incidenciaActualizada.id} asignada a ${incidenciaActualizada.responsable.nombre} correctamente.`
         );
-        // ------------------------------
         
         this.$emit("asignacionExitosa", incidenciaActualizada); 
         this.$emit("close");
@@ -199,7 +194,6 @@ export default {
 
 
 <style scoped>
-/* ESTILOS BÁSICOS PARA EL MODAL */
 .modal-backdrop {
   position: fixed;
   top: 0;
