@@ -69,7 +69,79 @@
           <span>{{ userName }}</span>
         </div>
       </header>
+      <section class="user-table-section">
+        <h2>Lista de Usuarios</h2>
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Usuario</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Administrador</td>
+              <td>admin</td>
+              <td>admin@magriturismo.com</td>
+              <td>ADMIN</td>
+              <td>
+                <button class="btn-edit"><i class="fas fa-edit"></i></button>
+                <button class="btn-delete"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Juan Pérez</td>
+              <td>juanp</td>
+              <td>juanp@example.com</td>
+              <td>USUARIO</td>
+              <td>
+                <button class="btn-edit"><i class="fas fa-edit"></i></button>
+                <button class="btn-delete"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
+      <!-- Módulo de reportes -->
+      <section class="reports-section">
+        <h2>Reportes y Seguimiento de Incidencias</h2>
+
+        <div class="report-filters">
+          <label for="filter">Filtrar por:</label>
+          <select id="filter">
+            <option value="todas">Todas las incidencias</option>
+            <option value="abiertas">Abiertas</option>
+            <option value="cerradas">Cerradas</option>
+            <option value="pendientes">Pendientes</option>
+          </select>
+          <button class="btn-filter"><i class="fas fa-filter"></i> Aplicar</button>
+        </div>
+
+        <!-- Gráficos (más adelante se llenarán con JS o librerías) -->
+        <div class="charts-container">
+          <div class="chart-card">
+            <h3>Incidencias por Estado</h3>
+            <div class="chart-placeholder">[ Gráfico de barras aquí ]</div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Incidencias por Categoría</h3>
+            <div class="chart-placeholder">[ Gráfico circular aquí ]</div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Evolución de Incidencias</h3>
+            <div class="chart-placeholder">[ Gráfico de línea aquí ]</div>
+          </div>
+        </div>
+  </section>
     
 
 
