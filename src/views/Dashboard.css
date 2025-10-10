@@ -651,79 +651,128 @@
 }
 
 
-
-
-
-
-
-.reports-section {
-  background: #fff;
-  margin: 30px auto;
+/* === SECCIÓN DE ACCIONES Y REPORTES === */
+.report-actions {
+  margin-top: 30px;
   padding: 25px;
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
-.reports-section h2 {
-  margin-bottom: 20px;
+.report-actions h3 {
   text-align: center;
-  color: #333;
+  color: #222;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
 }
 
-.report-filters {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
   margin-bottom: 25px;
 }
 
-.report-filters select {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.btn-filter {
-  background-color: #005f99;
-  color: white;
+.btn-action {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 8px 15px;
-  cursor: pointer;
-}
-
-.btn-filter:hover {
-  background-color: #004b7a;
-}
-
-.charts-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.chart-card {
-  background: #f9f9f9;
+  padding: 12px 18px;
   border-radius: 10px;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  cursor: pointer;
+  font-weight: 500;
+  text-align: left;
+  transition: transform 0.2s, background 0.3s;
 }
 
-.chart-placeholder {
-  height: 200px;
-  background: repeating-linear-gradient(
-    45deg,
-    #eaeaea,
-    #eaeaea 10px,
-    #f9f9f9 10px,
-    #f9f9f9 20px
-  );
+.btn-action i {
+  margin-right: 8px;
+}
+
+.btn-action:hover {
+  background: linear-gradient(135deg, #0066cc, #004a99);
+  transform: scale(1.03);
+}
+
+/* Historial de reportes */
+.report-log {
+  background: #f8f9fa;
+  padding: 15px;
   border-radius: 8px;
+  border-left: 4px solid #007bff;
+}
+
+.report-log h4 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.report-log ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.report-log li {
+  margin-bottom: 6px;
+  color: #555;
+}
+
+.report-log i {
+  color: #28a745;
+  margin-right: 5px;
+}
+/* === SELECT PERSONALIZADO DE FILTRO === */
+.report-filters select {
+  appearance: none; /* Elimina el estilo del sistema */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-color: #ffffff;
+  border: 1.5px solid #007bff;
+  border-radius: 8px;
+  padding: 10px 40px 10px 15px;
+  font-size: 0.95rem;
+  color: #333;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-family: inherit;
+  position: relative;
+}
+
+/* Sombra y color al enfocar */
+.report-filters select:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+}
+
+/* Efecto hover */
+.report-filters select:hover {
+  border-color: #0056b3;
+}
+
+/* Agrega una flecha personalizada */
+.report-filters {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: #777;
-  font-style: italic;
+  gap: 10px;
 }
+
+.report-filters::after {
+  content: "\f078"; /* icono Font Awesome: fa-chevron-down */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  position: absolute;
+  right: 35px;
+  pointer-events: none;
+  color: #007bff;
+  font-size: 0.8rem;
+}
+
+
+
+
+

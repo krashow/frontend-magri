@@ -7,42 +7,42 @@
       </div>
       <nav class="menu">
         <ul>
-          <li 
+          <li
             :class="{ active: currentRoute === '/dashboard' }"
             @click="navigateTo('/dashboard')"
           >
             <i class="fas fa-tachometer-alt"></i>
             <span>Inicio</span>
           </li>
-          <li 
+          <li
             :class="{ active: currentRoute === '/registrar-incidencia' }"
             @click="navigateTo('/registrar-incidencia')"
           >
             <i class="fas fa-plus-circle"></i>
             <span>Registrar Incidencia</span>
           </li>
-          <li 
+          <li
             :class="{ active: currentRoute === '/incidencias' }"
             @click="navigateTo('/incidencias')"
           >
             <i class="fas fa-exclamation-triangle"></i>
             <span>Incidencias</span>
           </li>
-          <li 
+          <li
             :class="{ active: currentRoute === '/usuarios' }"
             @click="navigateTo('/usuarios')"
           >
             <i class="fas fa-users"></i>
             <span>Usuarios</span>
           </li>
-          <li 
+          <li
             :class="{ active: currentRoute === '/notificaciones' }"
             @click="navigateTo('/notificaciones')"
           >
             <i class="fas fa-bell"></i>
             <span>Asignaciones</span>
           </li>
-          <li 
+          <li
             :class="{ active: currentRoute === '/reportes' }"
             @click="navigateTo('/reportes')"
           >
@@ -69,80 +69,83 @@
           <span>{{ userName }}</span>
         </div>
       </header>
-      <section class="user-table-section">
-        <h2>Lista de Usuarios</h2>
-        <table class="user-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Usuario</th>
-              <th>Correo</th>
-              <th>Rol</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>Administrador</td>
-              <td>admin</td>
-              <td>admin@magriturismo.com</td>
-              <td>ADMIN</td>
-              <td>
-                <button class="btn-edit"><i class="fas fa-edit"></i></button>
-                <button class="btn-delete"><i class="fas fa-trash"></i></button>
-              </td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Juan Pérez</td>
-              <td>juanp</td>
-              <td>juanp@example.com</td>
-              <td>USUARIO</td>
-              <td>
-                <button class="btn-edit"><i class="fas fa-edit"></i></button>
-                <button class="btn-delete"><i class="fas fa-trash"></i></button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
       <!-- Módulo de reportes -->
-      <section class="reports-section">
-        <h2>Reportes y Seguimiento de Incidencias</h2>
+        <!-- Módulo de reportes -->
+<section class="reports-section">
+  <h2>Reportes y Seguimiento de Incidencias</h2>
 
-        <div class="report-filters">
-          <label for="filter">Filtrar por:</label>
-          <select id="filter">
-            <option value="todas">Todas las incidencias</option>
-            <option value="abiertas">Abiertas</option>
-            <option value="cerradas">Cerradas</option>
-            <option value="pendientes">Pendientes</option>
-          </select>
-          <button class="btn-filter"><i class="fas fa-filter"></i> Aplicar</button>
-        </div>
+  <div class="report-filters">
+    <label for="filter">Filtrar por:</label>
+    <select id="filter">
+      <option value="todas">Todas las incidencias</option>
+      <option value="abiertas">Abiertas</option>
+      <option value="cerradas">Cerradas</option>
+      <option value="pendientes">Pendientes</option>
+    </select>
+    <button class="btn-filter">
+      <i class="fas fa-filter"></i> Aplicar
+    </button>
+  </div>
 
-        <!-- Gráficos (más adelante se llenarán con JS o librerías) -->
-        <div class="charts-container">
-          <div class="chart-card">
-            <h3>Incidencias por Estado</h3>
-            <div class="chart-placeholder">[ Gráfico de barras aquí ]</div>
-          </div>
+  <!-- Gráficos (más adelante con JS o librerías) -->
+  <div class="charts-container">
+    <div class="chart-card">
+      <h3>Incidencias por Estado</h3>
+      <div class="chart-placeholder">[ Gráfico de barras aquí ]</div>
+    </div>
 
-          <div class="chart-card">
-            <h3>Incidencias por Categoría</h3>
-            <div class="chart-placeholder">[ Gráfico circular aquí ]</div>
-          </div>
+    <div class="chart-card">
+      <h3>Incidencias por Categoría</h3>
+      <div class="chart-placeholder">[ Gráfico circular aquí ]</div>
+    </div>
 
-          <div class="chart-card">
-            <h3>Evolución de Incidencias</h3>
-            <div class="chart-placeholder">[ Gráfico de línea aquí ]</div>
-          </div>
-        </div>
-  </section>
-    
+    <div class="chart-card">
+      <h3>Evolución de Incidencias</h3>
+      <div class="chart-placeholder">[ Gráfico de línea aquí ]</div>
+    </div>
+  </div>
+
+  <!-- NUEVA SECCIÓN DE ACCIONES -->
+  <div class="report-actions">
+    <h3>Acciones y Generación de Reportes</h3>
+
+    <div class="actions-grid">
+      <button class="btn-action">
+        <i class="fas fa-file-alt"></i> Generar Reporte General
+      </button>
+
+      <button class="btn-action">
+        <i class="fas fa-calendar-alt"></i> Listar Incidencias por Mes
+      </button>
+
+      <button class="btn-action">
+        <i class="fas fa-chart-pie"></i> Reporte por Categoría
+      </button>
+
+      <button class="btn-action">
+        <i class="fas fa-users-cog"></i> Reporte por Técnico
+      </button>
+
+      <button class="btn-action">
+        <i class="fas fa-download"></i> Exportar a PDF
+      </button>
+
+      <button class="btn-action">
+        <i class="fas fa-file-excel"></i> Exportar a Excel
+      </button>
+    </div>
+
+    <div class="report-log">
+      <h4>Historial de reportes generados</h4>
+      <ul>
+        <li><i class="fas fa-check-circle"></i> Reporte mensual - Septiembre 2025</li>
+        <li><i class="fas fa-check-circle"></i> Reporte general - Agosto 2025</li>
+        <li><i class="fas fa-check-circle"></i> Reporte por categoría - Julio 2025</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
 
 
       
@@ -151,25 +154,25 @@
 </template>
 
 <script setup>
-import { useRouter, useRoute } from "vue-router"
-import "./Dashboard.css"
+import { useRouter, useRoute } from "vue-router";
+import "./Dashboard.css";
 
-const router = useRouter()
-const route = useRoute()
-const currentRoute = route.path
+const router = useRouter();
+const route = useRoute();
+const currentRoute = route.path;
 
-const userName = "Administrador"
+const userName = "Administrador";
 
 const logout = () => {
   if (window.confirm("¿Seguro que deseas cerrar sesión?")) {
-    localStorage.removeItem("token")
-    router.push("/login")
+    localStorage.removeItem("token");
+    router.push("/login");
   }
-}
+};
 
 const navigateTo = (path) => {
-  router.push(path)
-}
+  router.push(path);
+};
 </script>
 
 <style scoped src="./Dashboard.css"></style>
