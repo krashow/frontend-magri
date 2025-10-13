@@ -104,6 +104,7 @@
                             <th>Estado</th>
                             <th>Fecha Registro</th>
                             <th>Descripción</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,7 +119,7 @@
                             <td>{{ formatDate(incidencia.fechaRegistro) }}</td>
                             <td class="description-cell">{{ incidencia.descripcion }}</td>
                             <td>
-                                <button class="action-btn" @click="openGestionModal(incidencia)">
+                                <button class="action-btn" @click="openDetalleModal(incidencia)">
                                     <i class="fas fa-tools"></i> Gestionar
                                 </button>
                             </td>
@@ -128,15 +129,13 @@
             </div>
         </div>
     </main>
-    <GestionModal
-        :is-open="isModalGestionOpen"
+    
+    <DetalleModal
+        v-if="isModalOpen"
         :incidencia="selectedIncidencia"
-        :gestion-data="gestionData"
-        :get-estado-class="getEstadoClass"
-        :format-date="formatDate"
-        @close="isModalGestionOpen = false"
-        @save="simularGuardarGestion"
+        @cerrar="closeDetalleModal"
     />
+
 </div>
 </template>
 
@@ -145,13 +144,14 @@ import { ref } from 'vue';
 import { useRouter, useRoute } from "vue-router";
 import axios from 'axios';
 import "./Dashboard.css";
-import GestionModal from '/src/views/GestionModal.vue';
+// Asegúrate de que esta ruta sea correcta
+import DetalleModal from '/src/views/DetalleModal.vue'; 
 
 const router = useRouter();
 const route = useRoute();
 const currentRoute = route.path;
 
-const userName = "Administrador";
+const userName = ref("Administrador"); // Convertido a ref por si acaso
 
 // --- Lógica del menú ---
 const logout = () => {
@@ -165,7 +165,7 @@ const navigateTo = (path) => {
     router.push(path);
 };
 
-// --- Lógica de Notificaciones.vue (Inicio) ---
+// --- Lógica de Notificaciones.vue (Incidencias Asignadas) ---
 const responsableId = ref(1);
 const incidencias = ref([]);
 const isLoading = ref(false);
@@ -188,7 +188,16 @@ const cargarIncidencias = async () => {
         const url = `${API_BASE_URL}?idResponsable=${responsableId.value}`;
         const response = await axios.get(url);
         
-        incidencias.value = response.data;
+        // Simulación: Asegurar que el estado tenga la propiedad 'tipo' que espera el modal
+        const dataConTipoEstado = response.data.map(inc => ({
+            ...inc,
+            estado: {
+                tipo: inc.estado?.nombre || 'Abierto', // Usamos el nombre como 'tipo' para compatibilidad
+                nombre: inc.estado?.nombre // Mantenemos el nombre original
+            }
+        }));
+        
+        incidencias.value = dataConTipoEstado;
         
     } catch (error) {
         console.error('Error al cargar las incidencias:', error);
@@ -228,47 +237,32 @@ const getEstadoClass = (estadoNombre) => {
     }
     return 'estado-gris';
 };
-// --- Lógica de Notificaciones.vue (Fin) ---
 
-const isModalGestionOpen = ref(false);
-const selectedIncidencia = ref({});
-const gestionData = ref({
-    seguimiento: '',
-    nuevoEstado: 'En Proceso',
-    fechaCierre: new Date().toISOString().substring(0, 10) 
-});
+// --- Lógica del Nuevo Detalle Modal (Limpia) ---
+const isModalOpen = ref(false);
+const selectedIncidencia = ref(null); 
 
-const openGestionModal = (incidencia) => {
-    // 1. Guardar la incidencia seleccionada
-    selectedIncidencia.value = { ...incidencia };
-
-    // 2. Inicializar el formulario de gestión con el estado actual
-    const currentStatus = incidencia.estado?.nombre || 'Abierto';
-    gestionData.value.nuevoEstado = currentStatus;
-    gestionData.value.seguimiento = `[${new Date().toLocaleDateString('es-ES')}] - Iniciando gestión.`; 
-
-    // 3. Abrir el modal
-    isModalGestionOpen.value = true;
+const openDetalleModal = (incidencia) => {
+    // 1. **Copia Profunda para Reactividad Segura**
+    // Es vital copiar el estado si el modal lo va a modificar (como el estado.tipo)
+    selectedIncidencia.value = { 
+        ...incidencia, 
+        estado: { 
+            tipo: incidencia.estado?.tipo || incidencia.estado?.nombre, 
+            nombre: incidencia.estado?.nombre 
+        }
+    }; 
+    
+    // 2. Activar el modal
+    isModalOpen.value = true;
 };
 
-const simularGuardarGestion = () => {
-    // Función llamada desde el Modal (hijo)
-    console.log("--- SIMULACIÓN DE GESTIÓN ---");
-    console.log(`Incidencia ID: ${selectedIncidencia.value.id}`);
-    console.log(`Nuevo Estado: ${gestionData.value.nuevoEstado}`);
-    console.log(`Seguimiento Añadido: ${gestionData.value.seguimiento}`);
-    
-    if (gestionData.value.nuevoEstado === 'Cerrado' || gestionData.value.nuevoEstado === 'Resuelto') {
-        console.log(`Fecha de Cierre (Simulada): ${gestionData.value.fechaCierre}`);
-    }
-    
-    // Alerta de éxito simulada
-    alert(`¡Maquetación exitosa! La incidencia #${selectedIncidencia.value.id} se actualizaría al estado: ${gestionData.value.nuevoEstado}`);
-    
-    isModalGestionOpen.value = false;
+const closeDetalleModal = () => {
+    isModalOpen.value = false;
+    selectedIncidencia.value = null;
 };
 
-
+// **NOTA:** Se eliminaron las variables y funciones obsoletas (isModalGestionOpen, gestionData, openGestionModal, simularGuardarGestion)
 </script>
 
 <style scoped>

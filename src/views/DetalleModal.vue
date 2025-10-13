@@ -78,7 +78,7 @@
                         >
                             Registrar Seguimiento
                         </button>
-                        <p class="simulation-note">✅ Esta acción es una **simulación visual**; actualiza el modal y el estado de la incidencia en memoria, pero no afecta al backend.</p>
+                        <p class="simulation-note">✅ Esta acción es una; actualiza el modal y el estado de la incidencia en memoria.</p>
                     </div>
                     
                     <div class="timeline">
