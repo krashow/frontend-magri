@@ -138,6 +138,7 @@ const seguimientoSimulado = ref([
         descripcion: 'Se aplicó un parche de configuración. Se necesita verificar su impacto en las próximas 24 horas antes de cerrar. En este punto se adjunta un log de cambios.'
     }
 ]);
+
 </script>
 <style scoped>
 
@@ -208,6 +209,144 @@ const seguimientoSimulado = ref([
 .modal-body {
     padding: 32px; 
 }
+
+
+.tabs-nav {
+    display: flex;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 0 32px; /* Alineación con el padding del modal-body */
+    background-color: #ffffff; /* Asegura un fondo blanco debajo de las pestañas */
+}
+
+.tabs-nav button {
+    background: none;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #64748b; /* Texto inactivo */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px; /* Para que la línea activa se superponga al borde inferior */
+}
+
+.tabs-nav button:hover:not(.active) {
+    color: #3b82f6;
+    background-color: #f1f5f9;
+}
+
+.tabs-nav button.active {
+    color: #3b82f6; /* Color primario */
+    font-weight: 600;
+    border-bottom: 3px solid #3b82f6; /* Línea indicadora activa */
+}
+
+.tab-content {
+    /* El contenido de la pestaña ya tiene padding del .modal-body */
+    /* Aquí se mostrará u ocultará con v-show */
+}
+
+/* ---------------------------------------------------------------------- */
+
+/* ESTILOS DEL SEGUIMIENTO (SIMULADO) */
+
+/* Formulario para nuevo seguimiento */
+.new-tracking-form {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 32px;
+}
+.new-tracking-form textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    resize: vertical;
+    font-size: 14px;
+}
+.new-tracking-form .btn-primary.edit {
+    margin-right: 10px;
+}
+.simulation-note {
+    font-size: 13px;
+    color: #ef4444;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* Línea de tiempo */
+.timeline {
+    position: relative;
+    padding-left: 30px; 
+    border-left: 2px solid #e2e8f0; /* La línea vertical */
+}
+
+.timeline-item {
+    margin-bottom: 30px;
+    position: relative;
+    padding: 10px 0 10px 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -38px; /* Ajusta la posición para que el punto quede sobre la línea */
+    top: 20px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 3px solid #ffffff; /* Borde interior blanco */
+    box-shadow: 0 0 0 2px #e2e8f0; /* Borde exterior */
+}
+
+/* Colores para los tipos de seguimiento */
+.dot-asignación {
+    background-color: #3b82f6; /* Azul */
+    box-shadow: 0 0 0 2px #3b82f6;
+}
+.dot-nota {
+    background-color: #fb923c; /* Naranja */
+    box-shadow: 0 0 0 2px #fb923c;
+}
+.dot-estado {
+    background-color: #10b981; /* Verde */
+    box-shadow: 0 0 0 2px #10b981;
+}
+.dot-solución {
+    background-color: #6366f1; /* Morado */
+    box-shadow: 0 0 0 2px #6366f1;
+}
+
+
+.timeline-title {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: #1e293b;
+}
+
+.timeline-meta {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+.timeline-description {
+    font-size: 15px;
+    color: #475569;
+    line-height: 1.5;
+}
+
+
+
+
 .data-group {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
