@@ -15,7 +15,7 @@
                     :class="{ 'active': activeTab === 'seguimiento' }" 
                     @click="activeTab = 'seguimiento'"
                 >
-                    Seguimiento (Simulación)
+                    Seguimiento
                 </button>
             </div>
 
@@ -49,10 +49,36 @@
                     <h3>Registro de Actividad y Seguimiento</h3>
                     
                     <div class="new-tracking-form">
-                        <h4>Registrar Nuevo Seguimiento (Simulado)</h4>
-                        <textarea placeholder="Escribe tu nota de seguimiento aquí. Simulación de un técnico/usuario registrando una acción." aria-label="Nuevo Seguimiento"></textarea>
-                        <button class="btn-primary edit" disabled>Añadir Seguimiento</button>
-                        <p class="simulation-note">⚠️ Este formulario y botón están deshabilitados. Es solo una simulación visual.</p>
+                        <h4>Añadir Seguimiento y/o Cambiar Estado</h4>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fechaSeguimiento">Fecha y Hora:</label>
+                                <input type="datetime-local" id="fechaSeguimiento" v-model="newSeguimiento.fecha">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="estadoSeguimiento">Nuevo Estado:</label>
+                                <select id="estadoSeguimiento" v-model="newSeguimiento.nuevoEstado">
+                                    <option v-for="estado in estadosDisponibles" :key="estado" :value="estado">{{ estado }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <label for="descSeguimiento">Nota de Seguimiento (Obligatoria):</label>
+                        <textarea 
+                            id="descSeguimiento"
+                            placeholder="Describe el avance, la acción realizada, o la razón del cambio de estado." 
+                            v-model="newSeguimiento.descripcion"
+                        ></textarea>
+                        
+                        <button 
+                            @click="agregarSeguimientoSimulado" 
+                            class="btn-primary edit"
+                        >
+                            Registrar Seguimiento
+                        </button>
+                        <p class="simulation-note">✅ Esta acción es una **simulación visual**; actualiza el modal y el estado de la incidencia en memoria, pero no afecta al backend.</p>
                     </div>
                     
                     <div class="timeline">
@@ -93,39 +119,90 @@ defineEmits(['cerrar', 'editar']);
 // Estado para controlar la pestaña activa (Por defecto: 'vista')
 const activeTab = ref('vista');
 
-// Datos de Seguimiento Simulados para la vista previa
+// Lista de posibles estados para el select (simulación)
+const estadosDisponibles = ref([
+    'Abierta',
+    'En Proceso',
+    'Pendiente de Usuario',
+    'Resuelta (Verificación)',
+    'Cerrada'
+]);
+
+// 1. Estado Reactivo para el nuevo seguimiento
+const newSeguimiento = ref({
+    descripcion: '',
+    fecha: new Date().toISOString().substring(0, 16), // Formato yyyy-MM-ddThh:mm
+    // Inicializar con el estado actual de la incidencia
+    nuevoEstado: props.incidencia.estado.tipo 
+});
+
+// 2. Datos de Seguimiento Simulados Iniciales
 const seguimientoSimulado = ref([
     {
-        fecha: '12 Oct 2025, 14:30',
+        fecha: '12/10/2025, 14:30',
         usuario: 'Técnico Juan Pérez',
         tipo: 'Asignación',
         titulo: 'Incidencia Asignada',
         descripcion: 'La incidencia ha sido asignada al equipo de soporte de Nivel 1 para su revisión inicial.'
     },
     {
-        fecha: '13 Oct 2025, 09:15',
+        fecha: '13/10/2025, 09:15',
         usuario: 'Técnico Juan Pérez',
         tipo: 'Nota',
         titulo: 'Análisis Inicial Completado',
-        descripcion: 'Se realizó el análisis inicial. El problema parece estar relacionado con la configuración del servidor X. Se requiere elevar a Nivel 2.'
-    },
-    {
-        fecha: '13 Oct 2025, 11:45',
-        usuario: 'Sistema',
-        tipo: 'Estado',
-        titulo: 'Estado Actualizado a "En Proceso"',
-        descripcion: 'El estado de la incidencia fue cambiado automáticamente a "En Proceso" tras el primer registro de actividad.'
-    },
-    {
-        fecha: '13 Oct 2025, 14:00',
-        usuario: 'Técnico Nivel 2 - Ana Gómez',
-        tipo: 'Solución',
-        titulo: 'Aplicación de Solución (Simulada)',
-        descripcion: 'Se aplicó un parche de configuración. Se necesita verificar su impacto en las próximas 24 horas antes de cerrar. Adjunto Log: conf-fix-20251013.log'
+        descripcion: 'Se realizó el análisis inicial. Se requiere validar un problema de configuración.'
     }
 ]);
 
-// Funciones existentes (sin cambios)
+// 3. Función para añadir el seguimiento y actualizar el estado (Simulación)
+const agregarSeguimientoSimulado = () => {
+    // Validación mínima
+    if (!newSeguimiento.value.descripcion) {
+        alert("La nota de seguimiento es obligatoria para registrar una actividad.");
+        return;
+    }
+    
+    const fechaFormateada = formatFechaInput(newSeguimiento.value.fecha);
+
+    // A. Agregar el nuevo seguimiento como "Nota" a la línea de tiempo
+    const nuevoRegistro = {
+        fecha: fechaFormateada,
+        usuario: 'Usuario Actual (Simulado)',
+        tipo: 'Nota',
+        titulo: 'Nueva Nota de Seguimiento',
+        descripcion: newSeguimiento.value.descripcion
+    };
+    seguimientoSimulado.value.push(nuevoRegistro);
+
+    // B. Si el estado fue cambiado, registrarlo y actualizar la incidencia
+    if (newSeguimiento.value.nuevoEstado !== props.incidencia.estado.tipo) {
+        const estadoAnterior = props.incidencia.estado.tipo;
+        
+        // Actualizar el estado de la incidencia VISUALMENTE
+        props.incidencia.estado.tipo = newSeguimiento.value.nuevoEstado;
+
+        // Añadir registro de cambio de estado
+        seguimientoSimulado.value.push({
+            fecha: fechaFormateada,
+            usuario: 'Sistema/Usuario Actual',
+            tipo: 'Estado',
+            titulo: `Estado actualizado a "${props.incidencia.estado.tipo}"`,
+            descripcion: `Cambio de estado de "${estadoAnterior}" a "${props.incidencia.estado.tipo}" registrado.`
+        });
+    }
+
+    // C. Ordenar la línea de tiempo (se asume que la fecha de 'datetime-local' es ordenable como string)
+    seguimientoSimulado.value.sort((a, b) => (a.fecha > b.fecha) ? 1 : -1);
+
+    // D. Resetear el formulario
+    newSeguimiento.value.descripcion = '';
+    newSeguimiento.value.fecha = new Date().toISOString().substring(0, 16);
+    // Asegurarse de que el selector muestre el estado actual de la incidencia
+    newSeguimiento.value.nuevoEstado = props.incidencia.estado.tipo; 
+};
+
+
+// Funciones de formato existentes
 const formatFecha = (dateTimeStr) => {
     if (!dateTimeStr) return 'N/A';
     const date = new Date(dateTimeStr);
@@ -135,24 +212,30 @@ const formatFecha = (dateTimeStr) => {
     });
 };
 
+// Función auxiliar para formatear la fecha del input para la visualización del timeline
+const formatFechaInput = (dateTimeInput) => {
+    if (!dateTimeInput) return 'N/A';
+    const [datePart, timePart] = dateTimeInput.split('T');
+    const [year, month, day] = datePart.split('-');
+    return `${day}/${month}/${year}, ${timePart}`;
+};
+
 const estadoClass = (estadoTipo) => { 
     switch (estadoTipo) {
         case 'Abierta': return 'status-open';
-        case 'En Proceso': return 'status-in-progress';
+        case 'En Proceso': 
+        case 'Resuelta (Verificación)': return 'status-in-progress';
+        case 'Pendiente de Usuario': return 'status-default'; // Usamos 'default' para pendiente
         case 'Cerrada': return 'status-closed';
         default: return 'status-default';
     }
 };
 </script>
 
----
-
-## Estilos CSS (Corregidos e Incorporados)
-
-```css
 <style scoped>
-/* ESTILOS ORIGINALES (Ajustados ligeramente para mantener coherencia) */
-
+/* ---------------------------------------------------------------------- */
+/* ESTILOS DE ESTRUCTURA Y BASE (Originales) */
+/* ---------------------------------------------------------------------- */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -239,7 +322,7 @@ const estadoClass = (estadoTipo) => {
     font-weight: 600;
 }
 
-/* Títulos H3 */
+/* Títulos H3 y H4 */
 .modal-body h3 {
     font-size: 20px;
     color: #3b82f6; 
@@ -290,7 +373,7 @@ const estadoClass = (estadoTipo) => {
     justify-content: flex-end;
     gap: 10px;
 }
-.btn-primary.edit { /* Estilo general para botones primarios (ej. Guardar/Editar) */
+.btn-primary.edit { 
     background: #6366f1; 
     color: white;
     padding: 10px 20px;
@@ -320,9 +403,11 @@ const estadoClass = (estadoTipo) => {
     background: #cbd5e1;
 }
 
+/* Estilos de Estado */
 .status-open,
 .status-in-progress,
-.status-closed {
+.status-closed,
+.status-default { 
     display: inline-block;
     padding: 4px 8px;
     border-radius: 6px;
@@ -332,25 +417,32 @@ const estadoClass = (estadoTipo) => {
 }
 
 .status-open {
-    color: #fb923c; 
+    color: #fb923c; /* Abierta */
     background-color: #fff7ed;
 }
 
 .status-in-progress {
-    color: #3b82f6; 
+    color: #3b82f6; /* En Proceso / Verificación */
     background-color: #eff6ff;
 }
 
 .status-closed {
-    color: #10b981; 
+    color: #10b981; /* Cerrada */
     background-color: #ecfdf5;
 }
 
-/* --- ESTILOS DE PESTAÑAS (NUEVOS) --- */
+.status-default { 
+    color: #7c3aed; /* Pendiente de Usuario */
+    background-color: #f5f3ff;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ESTILOS DE PESTAÑAS */
+/* ---------------------------------------------------------------------- */
 .tabs-nav {
     display: flex;
     border-bottom: 2px solid #e2e8f0;
-    padding: 0 32px; /* Alineación con el padding del modal-body */
+    padding: 0 32px; 
     background-color: #ffffff; 
 }
 
@@ -365,7 +457,7 @@ const estadoClass = (estadoTipo) => {
     transition: all 0.2s ease;
     border-bottom: 3px solid transparent;
     margin-bottom: -2px; 
-    outline: none; /* Mejor accesibilidad visual */
+    outline: none; 
 }
 
 .tabs-nav button:hover:not(.active) {
@@ -379,9 +471,9 @@ const estadoClass = (estadoTipo) => {
     border-bottom: 3px solid #3b82f6; 
 }
 
-/* --- ESTILOS DEL SEGUIMIENTO (SIMULADO) --- */
-
-/* Formulario para nuevo seguimiento */
+/* ---------------------------------------------------------------------- */
+/* ESTILOS DEL FORMULARIO DE SEGUIMIENTO INTERACTIVO */
+/* ---------------------------------------------------------------------- */
 .new-tracking-form {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -389,36 +481,64 @@ const estadoClass = (estadoTipo) => {
     padding: 20px;
     margin-bottom: 32px;
 }
+
+.new-tracking-form label {
+    display: block;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: 15px;
+}
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 10px;
+}
+.form-group {
+    flex: 1;
+}
+
+.new-tracking-form input[type="datetime-local"],
+.new-tracking-form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background-color: #ffffff;
+}
+
 .new-tracking-form textarea {
     width: 100%;
     min-height: 100px;
     padding: 10px;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     resize: vertical;
     font-size: 14px;
-}
-.new-tracking-form .btn-primary.edit {
-    margin-right: 10px;
-}
-.new-tracking-form .btn-primary.edit[disabled] {
-    opacity: 0.6;
-    cursor: not-allowed;
+    box-sizing: border-box;
 }
 
 .simulation-note {
     font-size: 13px;
-    color: #ef4444;
+    color: #34d399; 
     margin-top: 10px;
     font-style: italic;
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 8px;
 }
 
-/* Línea de tiempo */
+/* ---------------------------------------------------------------------- */
+/* ESTILOS DE LÍNEA DE TIEMPO */
+/* ---------------------------------------------------------------------- */
+
 .timeline {
     position: relative;
     padding-left: 30px; 
-    border-left: 2px solid #e2e8f0; /* La línea vertical */
+    border-left: 2px solid #e2e8f0; 
     margin-top: 20px;
 }
 
@@ -444,22 +564,21 @@ const estadoClass = (estadoTipo) => {
 
 /* Colores para los tipos de seguimiento */
 .dot-asignación {
-    background-color: #3b82f6; 
+    background-color: #3b82f6; /* Azul */
     box-shadow: 0 0 0 2px #3b82f6;
 }
 .dot-nota {
-    background-color: #fb923c; 
+    background-color: #fb923c; /* Naranja */
     box-shadow: 0 0 0 2px #fb923c;
 }
-.dot-estado {
-    background-color: #10b981; 
+.dot-estado { 
+    background-color: #10b981; /* Verde (Cambio de Estado) */
     box-shadow: 0 0 0 2px #10b981;
 }
 .dot-solución {
-    background-color: #6366f1; 
+    background-color: #6366f1; /* Morado */
     box-shadow: 0 0 0 2px #6366f1;
 }
-
 
 .timeline-title {
     margin: 0 0 5px 0;
@@ -478,7 +597,6 @@ const estadoClass = (estadoTipo) => {
     color: #475569;
     line-height: 1.5;
 }
-
 
 /* Animaciones */
 @keyframes fadeIn {
