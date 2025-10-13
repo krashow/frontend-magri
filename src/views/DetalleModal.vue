@@ -2,31 +2,70 @@
     <div class="modal-overlay" @click.self="$emit('cerrar')">
         <div class="modal-content">
             <h2>Detalle de Incidencia #{{ incidencia.id }}</h2>
-            
             <button class="close-btn" @click="$emit('cerrar')">&times;</button>
 
+            <div class="tabs-nav">
+                <button 
+                    :class="{ 'active': activeTab === 'vista' }" 
+                    @click="activeTab = 'vista'"
+                >
+                    Vista General
+                </button>
+                <button 
+                    :class="{ 'active': activeTab === 'seguimiento' }" 
+                    @click="activeTab = 'seguimiento'"
+                >
+                    Seguimiento (Simulación)
+                </button>
+            </div>
+
             <div class="modal-body">
-                <div class="data-group">
-                    <p><strong>Código:</strong> {{ incidencia.codigoReferencia }}</p>
-                    <p><strong>Fecha de Registro:</strong> {{ formatFecha(incidencia.fechaRegistro) }}</p>
-                    <p><strong>Estado:</strong> <span :class="estadoClass(incidencia.estado.tipo)">{{ incidencia.estado.tipo }}</span></p>
-                    <p><strong>Prioridad:</strong> {{ incidencia.prioridad ? incidencia.prioridad.nombre : 'S/I' }}</p>
-                </div>
-                
-                <h3>Referencia</h3>
-                <div class="data-group">
-                    <p><strong>Usuario:</strong> {{ incidencia.usuario ? incidencia.usuario.nombre : 'S/I' }}</p>
-                    <p><strong>Área:</strong> {{ incidencia.area ? incidencia.area.nombre : 'S/I' }}</p>
-                    <p><strong>Categoría:</strong> {{ incidencia.categoria ? incidencia.categoria.nombre : 'S/I' }}</p>
+                <div v-show="activeTab === 'vista'" class="tab-content">
+                    <div class="data-group">
+                        <p><strong>Código:</strong> {{ incidencia.codigoReferencia }}</p>
+                        <p><strong>Fecha de Registro:</strong> {{ formatFecha(incidencia.fechaRegistro) }}</p>
+                        <p><strong>Estado:</strong> <span :class="estadoClass(incidencia.estado.tipo)">{{ incidencia.estado.tipo }}</span></p>
+                        <p><strong>Prioridad:</strong> {{ incidencia.prioridad ? incidencia.prioridad.nombre : 'S/I' }}</p>
+                    </div>
+                    
+                    <h3>Referencia</h3>
+                    <div class="data-group">
+                        <p><strong>Usuario:</strong> {{ incidencia.usuario ? incidencia.usuario.nombre : 'S/I' }}</p>
+                        <p><strong>Área:</strong> {{ incidencia.area ? incidencia.area.nombre : 'S/I' }}</p>
+                        <p><strong>Categoría:</strong> {{ incidencia.categoria ? incidencia.categoria.nombre : 'S/I' }}</p>
+                    </div>
+
+                    <h3>Detalle y Observaciones</h3>
+                    <div class="description-box">
+                        <h4>Descripción (Respuestas del formulario):</h4>
+                        <pre>{{ incidencia.dscInc }}</pre> 
+                        
+                        <h4>Observación del Usuario:</h4>
+                        <p>{{ incidencia.obsInc || 'No se proporcionaron observaciones adicionales.' }}</p>
+                    </div>
                 </div>
 
-                <h3>Detalle y Observaciones</h3>
-                <div class="description-box">
-                    <h4>Descripción (Respuestas del formulario):</h4>
-                    <pre>{{ incidencia.dscInc }}</pre> 
+                <div v-show="activeTab === 'seguimiento'" class="tab-content">
+                    <h3>Registro de Actividad y Seguimiento</h3>
                     
-                    <h4>Observación del Usuario:</h4>
-                    <p>{{ incidencia.obsInc || 'No se proporcionaron observaciones adicionales.' }}</p>
+                    <div class="new-tracking-form">
+                        <h4>Registrar Nuevo Seguimiento (Simulado)</h4>
+                        <textarea placeholder="Escribe tu nota de seguimiento aquí..."></textarea>
+                        <button class="btn-primary edit" disabled>Añadir Seguimiento</button>
+                        <p class="simulation-note">⚠️ Este botón está deshabilitado. Es solo una simulación visual.</p>
+                    </div>
+                    
+                    <div class="timeline">
+                        <div v-for="(item, index) in seguimientoSimulado" :key="index" class="timeline-item">
+                            <div class="timeline-dot" :class="`dot-${item.tipo.toLowerCase()}`"></div>
+                            <div class="timeline-content">
+                                <p class="timeline-title"><strong>{{ item.titulo }}</strong></p>
+                                <p class="timeline-meta">{{ item.fecha }} por {{ item.usuario }}</p>
+                                <div class="timeline-description">{{ item.descripcion }}</div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -38,6 +77,7 @@
         </div>
     </div>
 </template>
+
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
@@ -68,6 +108,36 @@ const estadoClass = (estadoTipo) => {
         default: return 'status-default';
     }
 };
+const seguimientoSimulado = ref([
+    {
+        fecha: '12 Oct 2025, 14:30',
+        usuario: 'Técnico Juan Pérez',
+        tipo: 'Asignación',
+        titulo: 'Incidencia Asignada',
+        descripcion: 'La incidencia ha sido asignada al equipo de soporte de Nivel 1 para su revisión inicial.'
+    },
+    {
+        fecha: '13 Oct 2025, 09:15',
+        usuario: 'Técnico Juan Pérez',
+        tipo: 'Nota',
+        titulo: 'Análisis Inicial Completado',
+        descripcion: 'Se realizó el análisis inicial. El problema parece estar relacionado con la configuración del servidor X. Se requiere elevar a Nivel 2.'
+    },
+    {
+        fecha: '13 Oct 2025, 11:45',
+        usuario: 'Sistema',
+        tipo: 'Estado',
+        titulo: 'Estado Actualizado a "En Proceso"',
+        descripcion: 'El estado de la incidencia fue cambiado automáticamente a "En Proceso" tras el primer registro de actividad.'
+    },
+    {
+        fecha: '13 Oct 2025, 14:00',
+        usuario: 'Técnico Nivel 2 - Ana Gómez',
+        tipo: 'Solución',
+        titulo: 'Aplicación de Solución (Simulada)',
+        descripcion: 'Se aplicó un parche de configuración. Se necesita verificar su impacto en las próximas 24 horas antes de cerrar. En este punto se adjunta un log de cambios.'
+    }
+]);
 </script>
 <style scoped>
 
