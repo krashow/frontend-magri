@@ -144,16 +144,13 @@ import { ref } from 'vue';
 import { useRouter, useRoute } from "vue-router";
 import axios from 'axios';
 import "./Dashboard.css";
-// Asegúrate de que esta ruta sea correcta
 import DetalleModal from '/src/views/DetalleModal.vue'; 
 
 const router = useRouter();
 const route = useRoute();
 const currentRoute = route.path;
 
-const userName = ref("Administrador"); // Convertido a ref por si acaso
-
-// --- Lógica del menú ---
+const userName = ref("Administrador"); 
 const logout = () => {
     if (window.confirm("¿Seguro que deseas cerrar sesión?")) {
         localStorage.removeItem("token");
@@ -164,8 +161,6 @@ const logout = () => {
 const navigateTo = (path) => {
     router.push(path);
 };
-
-// --- Lógica de Notificaciones.vue (Incidencias Asignadas) ---
 const responsableId = ref(1);
 const incidencias = ref([]);
 const isLoading = ref(false);
@@ -187,13 +182,11 @@ const cargarIncidencias = async () => {
     try {
         const url = `${API_BASE_URL}?idResponsable=${responsableId.value}`;
         const response = await axios.get(url);
-        
-        // Simulación: Asegurar que el estado tenga la propiedad 'tipo' que espera el modal
         const dataConTipoEstado = response.data.map(inc => ({
             ...inc,
             estado: {
-                tipo: inc.estado?.nombre || 'Abierto', // Usamos el nombre como 'tipo' para compatibilidad
-                nombre: inc.estado?.nombre // Mantenemos el nombre original
+                tipo: inc.estado?.nombre || 'Abierto',
+                nombre: inc.estado?.nombre 
             }
         }));
         
@@ -237,14 +230,10 @@ const getEstadoClass = (estadoNombre) => {
     }
     return 'estado-gris';
 };
-
-// --- Lógica del Nuevo Detalle Modal (Limpia) ---
 const isModalOpen = ref(false);
 const selectedIncidencia = ref(null); 
 
 const openDetalleModal = (incidencia) => {
-    // 1. **Copia Profunda para Reactividad Segura**
-    // Es vital copiar el estado si el modal lo va a modificar (como el estado.tipo)
     selectedIncidencia.value = { 
         ...incidencia, 
         estado: { 
@@ -252,8 +241,6 @@ const openDetalleModal = (incidencia) => {
             nombre: incidencia.estado?.nombre 
         }
     }; 
-    
-    // 2. Activar el modal
     isModalOpen.value = true;
 };
 
@@ -262,11 +249,9 @@ const closeDetalleModal = () => {
     selectedIncidencia.value = null;
 };
 
-// **NOTA:** Se eliminaron las variables y funciones obsoletas (isModalGestionOpen, gestionData, openGestionModal, simularGuardarGestion)
 </script>
 
 <style scoped>
-/* ESTILOS DE NOTIFICACIONES.VUE AGREGADOS AQUÍ */
 @import "./Dashboard.css"; 
 
 .incidencias-asignadas-page {
