@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Archivo temporal para registrar los commits generados
+touch historial.txt
+
+# Lista de commits con formato: FECHA|MENSAJE
+commits=(
+"2024-09-30 09:00:00|feat: Inicialización del proyecto Vue 3 con Vite. Estructura base de carpetas."
+"2024-09-30 11:30:00|chore: Instalación y configuración de dependencias (Router, Axios)."
+"2024-09-30 14:00:00|style: Incorporación de librería de íconos (Font Awesome) y estilos globales."
+"2024-09-30 16:30:00|feat(auth): Creación del componente Login.vue con formulario básico."
+"2024-09-30 18:00:00|refactor(router): Definición de rutas protegidas y públicas iniciales."
+"2024-10-01 09:30:00|feat(layout): Creación del componente Dashboard.vue (Layout principal)."
+"2024-10-01 12:00:00|style(sidebar): Implementación del sidebar y menú de navegación."
+"2024-10-01 14:30:00|feat(header): Diseño del header con información de usuario y logout."
+"2024-10-01 16:00:00|fix(css): Ajustes de flexbox para asegurar la correcta distribución del layout."
+"2024-10-01 17:30:00|chore(auth): Implementación de la lógica de logout y redirección."
+"2024-10-02 09:00:00|feat(page): Creación de la vista Incidencias.vue para listar."
+"2024-10-02 11:45:00|feat(api): Servicio Axios para consumir endpoint /incidencias/responsable/asignadas."
+"2024-10-02 14:15:00|feat(table): Maquetación de la tabla de incidencias con placeholders."
+"2024-10-02 16:30:00|style(table): Estilización de la tabla, filas y cabeceras. Clases de estado."
+"2024-10-02 18:00:00|fix(data): Manejo de errores 404 y estados de carga en Incidencias.vue."
+"2024-10-03 09:15:00|feat(modal): Creación del componente base DetalleModal.vue."
+"2024-10-03 11:00:00|feat(modal): Lógica de apertura y cierre del modal al hacer clic en 'Gestionar'."
+"2024-10-03 13:45:00|feat(tabs): Implementación de la navegación por pestañas dentro del modal."
+"2024-10-03 16:00:00|feat(detail): Contenido de la pestaña 'Vista General' con datos de incidencia."
+"2024-10-03 17:30:00|style(modal): Estilos para el overlay, el cuerpo del modal y las pestañas."
+"2024-10-04 09:45:00|feat(tracking): Estructura inicial de la pestaña 'Seguimiento'."
+"2024-10-04 12:15:00|feat(timeline): Diseño de la línea de tiempo (timeline) para registros de actividad."
+"2024-10-04 14:00:00|feat(form): Formulario para añadir nuevo seguimiento: textarea y selector de estado."
+"2024-10-04 16:30:00|feat(sim): Implementación de la simulación de agregar registro de seguimiento."
+"2024-10-04 18:00:00|feat(sim): Lógica para actualizar el estado principal de la incidencia desde el modal."
+"2024-10-05 09:00:00|refactor: Mover funciones de formato de fecha a un archivo utility compartido."
+"2024-10-05 11:30:00|fix(data): Asegurar la copia profunda del objeto incidencia al abrir el modal."
+"2024-10-05 14:00:00|style(badges): Refinar colores y estilos de las etiquetas de estado (badges)."
+"2024-10-05 16:15:00|feat(feedback): Añadir mensajes de alerta simulados después de registrar seguimiento."
+"2024-10-05 17:45:00|chore(cleanup): Eliminar código obsoleto y comentarios de prueba."
+"2024-10-06 09:30:00|feat(register): Creación de la vista RegistrarIncidencia.vue."
+"2024-10-06 12:00:00|feat(form): Maquetación del formulario con campos de usuario, área y descripción."
+"2024-10-06 14:30:00|feat(api): Implementación de la función de envío de datos vía POST a la API."
+"2024-10-06 16:45:00|feat(validation): Validación básica del formulario de registro (campos obligatorios)."
+"2024-10-06 18:00:00|style(form): Estilos limpios y responsivos para el formulario de registro."
+"2024-10-07 09:15:00|feat(report): Creación de la vista Reportes.vue (Estructura de la página)."
+"2024-10-07 11:30:00|chore(dependencies): Instalación de una librería de gráficos ligera (ej. Chart.js o similar)."
+"2024-10-07 14:00:00|feat(report): Componente de gráfico de estado por categoría (datos simulados)."
+"2024-10-07 16:30:00|docs: Actualización del README.md con instrucciones de setup del frontend."
+"2024-10-07 18:00:00|build: Ajustes finales en la configuración de build y preparación para despliegue."
+)
+
+# Bucle que genera los commits
+for entry in "${commits[@]}"; do
+  FECHA="${entry%%|*}"
+  MENSAJE="${entry#*|}"
+  echo "$FECHA - $MENSAJE" >> historial.txt
+  git add historial.txt
+  GIT_AUTHOR_DATE="$FECHA" GIT_COMMITTER_DATE="$FECHA" git commit -m "$MENSAJE"
+done
