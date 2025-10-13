@@ -140,14 +140,14 @@ const newSeguimiento = ref({
 const seguimientoSimulado = ref([
     {
         fecha: '12/10/2025, 14:30',
-        usuario: 'Técnico Juan Pérez',
-        tipo: 'Asignación',
-        titulo: 'Incidencia Asignada',
-        descripcion: 'La incidencia ha sido asignada al equipo de soporte de Nivel 1 para su revisión inicial.'
+        usuario: 'Administrador',
+        tipo: 'Incidencia',
+        titulo: 'Incidencia creada',
+        descripcion: 'Incidencia creada el 10 de octubre de 2025 a las 14:30., en el area de sistemas'
     },
     {
         fecha: '13/10/2025, 09:15',
-        usuario: 'Técnico Juan Pérez',
+        usuario: 'Administrador',
         tipo: 'Nota',
         titulo: 'Análisis Inicial Completado',
         descripcion: 'Se realizó el análisis inicial. Se requiere validar un problema de configuración.'
