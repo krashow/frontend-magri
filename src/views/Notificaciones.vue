@@ -397,9 +397,7 @@ const closeDetalleModal = () => {
     color: #555;
 }
 .action-btn {
-    /* Fondo azul oscuro */
     background-color: #004d99; 
-    /* Texto e ícono blanco */
     color: white; 
     
     padding: 8px 12px;
@@ -412,15 +410,11 @@ const closeDetalleModal = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
-/* Efecto al pasar el ratón (un poco más oscuro) */
 .action-btn:hover {
     background-color: #003366; 
 }
-
-/* Efecto al hacer click (para feedback visual) */
 .action-btn:active {
     transform: translateY(1px);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);

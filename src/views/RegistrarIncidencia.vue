@@ -219,12 +219,9 @@ const handleFileChange = (event) => {
     selectedFile.value = null
   }
 }
-// Navegación
 const navigateTo = (path) => {
   router.push(path)
 }
-
-// Cargar preguntas dinámicamente
 const cargarPreguntas = async () => {
   try {
     const resp = await axios.get(`http://localhost:8081/api/incidencias/preguntas/${categoriaSeleccionada.value}`)
@@ -234,8 +231,6 @@ const cargarPreguntas = async () => {
     alert("No se pudieron cargar las preguntas.")
   }
 }
-
-// Enviar incidencia
 const enviarIncidencia = async () => {
     if (!categoriaSeleccionada.value || !areaSeleccionada.value || !prioridadSeleccionada.value) {
         alert("❌ Debe seleccionar una Categoría, un Área y una Prioridad.")
@@ -251,8 +246,6 @@ const enviarIncidencia = async () => {
     }
     try {
         const resp = await axios.post("http://localhost:8081/api/incidencias/registrar", data)
-        
-        // Manejo de la respuesta del backend
         if (resp.data.success) {
             alert(`✅ ${resp.data.message}`)
             categoriaSeleccionada.value = ""
