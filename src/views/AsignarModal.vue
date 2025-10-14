@@ -98,16 +98,22 @@ export default {
         this.listaResponsables = response.data;
         console.log("✅ Responsables cargados con éxito.");
       } catch (error) {
-        console.error("❌ Error al cargar responsables:", error.response || error);
-        
+        console.error(
+          "❌ Error al cargar responsables:",
+          error.response || error
+        );
+
         let mensaje = "No se pudieron cargar los responsables. ";
 
         if (error.response && error.response.status === 403) {
-             mensaje += "Acceso denegado (Error 403). Confirma que la seguridad de Spring Boot permite la ruta /api/usuarios/responsables sin autenticar.";
+          mensaje +=
+            "Acceso denegado (Error 403). Confirma que la seguridad de Spring Boot permite la ruta /api/usuarios/responsables sin autenticar.";
         } else if (error.response && error.response.status === 404) {
-             mensaje += "Ruta no encontrada (Error 404). Verifica que el endpoint `/api/usuarios/responsables` exista y que el puerto sea `8081`.";
+          mensaje +=
+            "Ruta no encontrada (Error 404). Verifica que el endpoint `/api/usuarios/responsables` exista y que el puerto sea `8081`.";
         } else {
-             mensaje += "Revisa la URL, el puerto (8081), y los permisos del backend.";
+          mensaje +=
+            "Revisa la URL, el puerto (8081), y los permisos del backend.";
         }
 
         this.errorMensaje = mensaje;
@@ -133,10 +139,10 @@ export default {
         const response = await axios.post(endpoint, asignacionData);
         const incidenciaActualizada = response.data;
         this.$emit(
-          "mensajeGlobal", 
+          "mensajeGlobal",
           `Incidencia #${incidenciaActualizada.id} asignada a ${incidenciaActualizada.responsable.nombre} correctamente.`
         );
-        this.$emit("asignacionExitosa", incidenciaActualizada); 
+        this.$emit("asignacionExitosa", incidenciaActualizada);
         this.$emit("close");
         console.log(
           `✅ Incidencia #${this.incidencia.id} asignada con éxito al técnico.`
@@ -145,26 +151,32 @@ export default {
       } catch (error) {
         console.error("❌ Error al asignar:", error.response || error);
         let mensaje = "Error de red/servidor. Intenta de nuevo.";
-        
+
         if (error.response) {
-            switch (error.response.status) {
-                case 403:
-                    mensaje = "Acceso denegado (Error 403). El servidor requiere autenticación para asignar.";
-                    break;
-                case 404:
-                    mensaje = "Error: Incidencia o usuario no encontrado en la base de datos (Error 404).";
-                    break;
-                case 409:
-                    mensaje = "Acción denegada: No se puede asignar un responsable a una incidencia que ya está Cerrada.";
-                    break;
-                case 500:
-                    mensaje = "Error interno del servidor (500). Revisa la consola de tu servidor Spring Boot.";
-                    break;
-                default:
-                    mensaje = `Error al asignar: ${error.response.status} - ${error.response.statusText || 'Error desconocido'}.`;
-            }
+          switch (error.response.status) {
+            case 403:
+              mensaje =
+                "Acceso denegado (Error 403). El servidor requiere autenticación para asignar.";
+              break;
+            case 404:
+              mensaje =
+                "Error: Incidencia o usuario no encontrado en la base de datos (Error 404).";
+              break;
+            case 409:
+              mensaje =
+                "Acción denegada: No se puede asignar un responsable a una incidencia que ya está Cerrada.";
+              break;
+            case 500:
+              mensaje =
+                "Error interno del servidor (500). Revisa la consola de tu servidor Spring Boot.";
+              break;
+            default:
+              mensaje = `Error al asignar: ${error.response.status} - ${
+                error.response.statusText || "Error desconocido"
+              }.`;
+          }
         }
-        this.errorMensaje = mensaje;        
+        this.errorMensaje = mensaje;
       } finally {
         this.cargando = false;
       }
@@ -179,8 +191,6 @@ export default {
   },
 };
 </script>
-
-
 
 <style scoped>
 .modal-backdrop {

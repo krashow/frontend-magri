@@ -7,42 +7,42 @@
 
       <nav class="menu">
         <ul>
-          <li 
+          <li
             :class="{ active: currentRoute === '/dashboard' }"
             @click="navigateTo('/dashboard')"
           >
             <i class="fas fa-tachometer-alt"></i>
             <span>Inicio</span>
           </li>
-          <li 
+          <li
             :class="{ active: currentRoute === '/registrar-incidencia' }"
             @click="navigateTo('/registrar-incidencia')"
           >
             <i class="fas fa-plus-circle"></i>
             <span>Registrar Incidencia</span>
           </li>
-          <li 
+          <li
             :class="{ active: currentRoute === '/incidencias' }"
             @click="navigateTo('/incidencias')"
           >
             <i class="fas fa-exclamation-triangle"></i>
             <span>Incidencias</span>
           </li>
-          <li 
+          <li
             :class="{ active: currentRoute === '/usuarios' }"
             @click="navigateTo('/usuarios')"
           >
             <i class="fas fa-users"></i>
             <span>Usuarios</span>
           </li>
-          <li 
+          <li
             :class="{ active: currentRoute === '/notificaciones' }"
             @click="navigateTo('/notificaciones')"
           >
             <i class="fas fa-bell"></i>
             <span>Notificaciones</span>
           </li>
-          <li 
+          <li
             :class="{ active: currentRoute === '/reportes' }"
             @click="navigateTo('/reportes')"
           >
@@ -72,9 +72,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import './Dashboard.css';
+import { computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import "./Dashboard.css";
 
 const router = useRouter();
 const route = useRoute();

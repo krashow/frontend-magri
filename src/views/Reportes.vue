@@ -1,6 +1,5 @@
 <template>
   <div class="dashboard">
-    <!-- Barra lateral -->
     <aside class="sidebar">
       <div class="sidebar-logo">
         <img src="/logo.png" alt="Logo" />
@@ -59,96 +58,92 @@
         </button>
       </div>
     </aside>
-
-    <!-- Contenido principal -->
     <main class="main-content">
       <header class="header">
-        <!-- Usuario arriba a la derecha -->
         <div class="user-info">
           <i class="fas fa-user-circle"></i>
           <span>{{ userName }}</span>
         </div>
       </header>
-      <!-- Módulo de reportes -->
-        <!-- Módulo de reportes -->
-<section class="reports-section">
-  <h2>Reportes y Seguimiento de Incidencias</h2>
+      <section class="reports-section">
+        <h2>Reportes y Seguimiento de Incidencias</h2>
 
-  <div class="report-filters">
-    <label for="filter">Filtrar por:</label>
-    <select id="filter">
-      <option value="todas">Todas las incidencias</option>
-      <option value="abiertas">Abiertas</option>
-      <option value="cerradas">Cerradas</option>
-      <option value="pendientes">Pendientes</option>
-    </select>
-    <button class="btn-filter">
-      <i class="fas fa-filter"></i> Aplicar
-    </button>
-  </div>
+        <div class="report-filters">
+          <label for="filter">Filtrar por:</label>
+          <select id="filter">
+            <option value="todas">Todas las incidencias</option>
+            <option value="abiertas">Abiertas</option>
+            <option value="cerradas">Cerradas</option>
+            <option value="pendientes">Pendientes</option>
+          </select>
+          <button class="btn-filter">
+            <i class="fas fa-filter"></i> Aplicar
+          </button>
+        </div>
+        <div class="charts-container">
+          <div class="chart-card">
+            <h3>Incidencias por Estado</h3>
+            <div class="chart-placeholder">[ Gráfico de barras aquí ]</div>
+          </div>
 
-  <!-- Gráficos (más adelante con JS o librerías) -->
-  <div class="charts-container">
-    <div class="chart-card">
-      <h3>Incidencias por Estado</h3>
-      <div class="chart-placeholder">[ Gráfico de barras aquí ]</div>
-    </div>
+          <div class="chart-card">
+            <h3>Incidencias por Categoría</h3>
+            <div class="chart-placeholder">[ Gráfico circular aquí ]</div>
+          </div>
 
-    <div class="chart-card">
-      <h3>Incidencias por Categoría</h3>
-      <div class="chart-placeholder">[ Gráfico circular aquí ]</div>
-    </div>
+          <div class="chart-card">
+            <h3>Evolución de Incidencias</h3>
+            <div class="chart-placeholder">[ Gráfico de línea aquí ]</div>
+          </div>
+        </div>
+        <div class="report-actions">
+          <h3>Acciones y Generación de Reportes</h3>
 
-    <div class="chart-card">
-      <h3>Evolución de Incidencias</h3>
-      <div class="chart-placeholder">[ Gráfico de línea aquí ]</div>
-    </div>
-  </div>
+          <div class="actions-grid">
+            <button class="btn-action">
+              <i class="fas fa-file-alt"></i> Generar Reporte General
+            </button>
 
-  <!-- NUEVA SECCIÓN DE ACCIONES -->
-  <div class="report-actions">
-    <h3>Acciones y Generación de Reportes</h3>
+            <button class="btn-action">
+              <i class="fas fa-calendar-alt"></i> Listar Incidencias por Mes
+            </button>
 
-    <div class="actions-grid">
-      <button class="btn-action">
-        <i class="fas fa-file-alt"></i> Generar Reporte General
-      </button>
+            <button class="btn-action">
+              <i class="fas fa-chart-pie"></i> Reporte por Categoría
+            </button>
 
-      <button class="btn-action">
-        <i class="fas fa-calendar-alt"></i> Listar Incidencias por Mes
-      </button>
+            <button class="btn-action">
+              <i class="fas fa-users-cog"></i> Reporte por Técnico
+            </button>
 
-      <button class="btn-action">
-        <i class="fas fa-chart-pie"></i> Reporte por Categoría
-      </button>
+            <button class="btn-action">
+              <i class="fas fa-download"></i> Exportar a PDF
+            </button>
 
-      <button class="btn-action">
-        <i class="fas fa-users-cog"></i> Reporte por Técnico
-      </button>
+            <button class="btn-action">
+              <i class="fas fa-file-excel"></i> Exportar a Excel
+            </button>
+          </div>
 
-      <button class="btn-action">
-        <i class="fas fa-download"></i> Exportar a PDF
-      </button>
-
-      <button class="btn-action">
-        <i class="fas fa-file-excel"></i> Exportar a Excel
-      </button>
-    </div>
-
-    <div class="report-log">
-      <h4>Historial de reportes generados</h4>
-      <ul>
-        <li><i class="fas fa-check-circle"></i> Reporte mensual - Septiembre 2025</li>
-        <li><i class="fas fa-check-circle"></i> Reporte general - Agosto 2025</li>
-        <li><i class="fas fa-check-circle"></i> Reporte por categoría - Julio 2025</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-
-
-      
+          <div class="report-log">
+            <h4>Historial de reportes generados</h4>
+            <ul>
+              <li>
+                <i class="fas fa-check-circle"></i> Reporte mensual - Septiembre
+                2025
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i> Reporte general - Agosto
+                2025
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i> Reporte por categoría -
+                Julio 2025
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 </template>
