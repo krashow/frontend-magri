@@ -286,7 +286,6 @@ const estadoClass = (estadoTipo) => {
     backdrop-filter: blur(2px); 
     animation: fadeIn 0.3s ease-out;
 }
-
 .modal-content { 
     background: #ffffff;
     border-radius: 16px; 
