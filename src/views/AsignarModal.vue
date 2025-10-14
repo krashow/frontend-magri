@@ -204,7 +204,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1050;
+  z-index: 1001;
 }
 .modal-content {
   background: white;

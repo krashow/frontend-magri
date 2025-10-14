@@ -96,16 +96,30 @@
             </div>
 
             <div class="action-buttons modal-footer">
+                <button @click="asignar(incidencia.id)" class="btn-action assign">
+                    <i class="fas fa-user-plus"></i> Asignar Incidencia
+                </button>
                 <button @click="$emit('cerrar')" class="btn-secondary back">
                     Cerrar
                 </button>
             </div>
         </div>
     </div>
+
+    <AsignarModal
+        v-if="mostrarAsignarModal"
+        :incidencia="incidenciaAsignacion"
+        @close="cerrarAsignarModal"
+        @incidencia-asignada="incidenciaAsignadaHandler"
+        @mensajeGlobal="mostrarMensajeExito"
+    />
+    
 </template>
 
 <script setup>
 import { defineProps, defineEmits, ref } from 'vue';
+import axios from "axios";
+import AsignarModal from '/src/views/AsignarModal.vue';
 
 const props = defineProps({
     incidencia: {
@@ -116,10 +130,35 @@ const props = defineProps({
 
 defineEmits(['cerrar', 'editar']);
 
-// Estado para controlar la pestaña activa (Por defecto: 'vista')
 const activeTab = ref('vista');
 
-// Lista de posibles estados para el select (simulación)
+const mostrarAsignarModal = ref(false);
+const incidenciaAsignacion = ref(null); 
+
+const asignar = async (id) => {
+    try {
+        const url = `http://localhost:8081/api/incidencias/detalle?id=${id}`;
+        const resp = await axios.get(url);
+        incidenciaAsignacion.value = resp.data; 
+        mostrarAsignarModal.value = true; 
+        
+    } catch (err) {
+        console.error("Error al cargar detalle para asignar:", err);
+        alert("❌ No se pudo cargar el detalle de la incidencia para la asignación.");
+    }
+}
+const cerrarAsignarModal = () => {
+    mostrarAsignarModal.value = false;
+}
+const incidenciaAsignadaHandler = (incidenciaActualizada) => {
+    cerrarAsignarModal(); 
+    $emit('cerrar'); 
+}
+const mostrarMensajeExito = (mensaje) => {
+    alert('✅ ' + mensaje);
+}
+
+// Lista de posibles estados para el select
 const estadosDisponibles = ref([
     'Abierta',
     'En Proceso',
@@ -233,16 +272,13 @@ const estadoClass = (estadoTipo) => {
 </script>
 
 <style scoped>
-/* ---------------------------------------------------------------------- */
-/* ESTILOS DE ESTRUCTURA Y BASE (Originales) */
-/* ---------------------------------------------------------------------- */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 9999; 
+    z-index: 1000; 
     background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
@@ -471,9 +507,6 @@ const estadoClass = (estadoTipo) => {
     border-bottom: 3px solid #3b82f6; 
 }
 
-/* ---------------------------------------------------------------------- */
-/* ESTILOS DEL FORMULARIO DE SEGUIMIENTO INTERACTIVO */
-/* ---------------------------------------------------------------------- */
 .new-tracking-form {
     background: #f8fafc;
     border: 1px solid #e2e8f0;

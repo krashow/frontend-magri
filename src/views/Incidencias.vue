@@ -86,9 +86,9 @@
                                     <button @click="verDetalle(incidencia.id)" class="btn-action view">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button @click="asignar(incidencia.id)" class="btn-action assign">
+                                    <!--<button @click="asignar(incidencia.id)" class="btn-action assign">
                                         <i class="fas fa-user-plus"></i>
-                                    </button>
+                                    </button>-->
                                     <button @click="confirmarEliminar(incidencia.id)" class="btn-action delete">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -111,13 +111,6 @@
     @cerrar="mostrarModal = false"
     @editar="iniciarEdicionModal"
     />
-    <AsignarModal
-    v-if="mostrarAsignarModal"
-    :incidencia="incidenciaSeleccionada"
-    @close="cerrarAsignarModal"
-    @incidencia-asignada="incidenciaAsignadaHandler"
-    @mensajeGlobal="mostrarMensajeExito"
-    />
 
 </template>
 
@@ -127,7 +120,6 @@ import axios from "axios"
 import { useRouter, useRoute } from "vue-router"
 import "./Dashboard.css" 
 import DetalleModal from '/src/views/DetalleModal.vue';
-import AsignarModal from '/src/views/AsignarModal.vue';
 
 const router = useRouter()
 const route = useRoute()
@@ -142,6 +134,13 @@ const mostrarAsignarModal = ref(false)
 onMounted(() => {
     cargarIncidencias()
 })
+
+
+const handleDetalleModalClose = () => {
+    mostrarModal.value = false;
+    // Esto es vital para reflejar los cambios de asignación en la tabla del Dashboard
+    cargarIncidencias(); 
+}
 
 const cargarIncidencias = async () => {
     try {
