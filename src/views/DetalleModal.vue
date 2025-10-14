@@ -157,8 +157,6 @@ const incidenciaAsignadaHandler = (incidenciaActualizada) => {
 const mostrarMensajeExito = (mensaje) => {
     alert('✅ ' + mensaje);
 }
-
-// Lista de posibles estados para el select
 const estadosDisponibles = ref([
     'Abierta',
     'En Proceso',
@@ -166,16 +164,11 @@ const estadosDisponibles = ref([
     'Resuelta (Verificación)',
     'Cerrada'
 ]);
-
-// 1. Estado Reactivo para el nuevo seguimiento
 const newSeguimiento = ref({
     descripcion: '',
-    fecha: new Date().toISOString().substring(0, 16), // Formato yyyy-MM-ddThh:mm
-    // Inicializar con el estado actual de la incidencia
+    fecha: new Date().toISOString().substring(0, 16),
     nuevoEstado: props.incidencia.estado.tipo 
 });
-
-// 2. Datos de Seguimiento Simulados Iniciales
 const seguimientoSimulado = ref([
     {
         fecha: '12/10/2025, 14:30',
@@ -192,18 +185,13 @@ const seguimientoSimulado = ref([
         descripcion: 'Se realizó el análisis inicial. Se requiere validar un problema de configuración.'
     }
 ]);
-
-// 3. Función para añadir el seguimiento y actualizar el estado (Simulación)
 const agregarSeguimientoSimulado = () => {
-    // Validación mínima
     if (!newSeguimiento.value.descripcion) {
         alert("La nota de seguimiento es obligatoria para registrar una actividad.");
         return;
     }
     
     const fechaFormateada = formatFechaInput(newSeguimiento.value.fecha);
-
-    // A. Agregar el nuevo seguimiento como "Nota" a la línea de tiempo
     const nuevoRegistro = {
         fecha: fechaFormateada,
         usuario: 'Usuario Actual (Simulado)',
@@ -212,15 +200,9 @@ const agregarSeguimientoSimulado = () => {
         descripcion: newSeguimiento.value.descripcion
     };
     seguimientoSimulado.value.push(nuevoRegistro);
-
-    // B. Si el estado fue cambiado, registrarlo y actualizar la incidencia
     if (newSeguimiento.value.nuevoEstado !== props.incidencia.estado.tipo) {
         const estadoAnterior = props.incidencia.estado.tipo;
-        
-        // Actualizar el estado de la incidencia VISUALMENTE
         props.incidencia.estado.tipo = newSeguimiento.value.nuevoEstado;
-
-        // Añadir registro de cambio de estado
         seguimientoSimulado.value.push({
             fecha: fechaFormateada,
             usuario: 'Sistema/Usuario Actual',
@@ -229,19 +211,12 @@ const agregarSeguimientoSimulado = () => {
             descripcion: `Cambio de estado de "${estadoAnterior}" a "${props.incidencia.estado.tipo}" registrado.`
         });
     }
-
-    // C. Ordenar la línea de tiempo (se asume que la fecha de 'datetime-local' es ordenable como string)
     seguimientoSimulado.value.sort((a, b) => (a.fecha > b.fecha) ? 1 : -1);
-
-    // D. Resetear el formulario
     newSeguimiento.value.descripcion = '';
     newSeguimiento.value.fecha = new Date().toISOString().substring(0, 16);
-    // Asegurarse de que el selector muestre el estado actual de la incidencia
     newSeguimiento.value.nuevoEstado = props.incidencia.estado.tipo; 
 };
 
-
-// Funciones de formato existentes
 const formatFecha = (dateTimeStr) => {
     if (!dateTimeStr) return 'N/A';
     const date = new Date(dateTimeStr);
@@ -251,7 +226,6 @@ const formatFecha = (dateTimeStr) => {
     });
 };
 
-// Función auxiliar para formatear la fecha del input para la visualización del timeline
 const formatFechaInput = (dateTimeInput) => {
     if (!dateTimeInput) return 'N/A';
     const [datePart, timePart] = dateTimeInput.split('T');
@@ -264,7 +238,7 @@ const estadoClass = (estadoTipo) => {
         case 'Abierta': return 'status-open';
         case 'En Proceso': 
         case 'Resuelta (Verificación)': return 'status-in-progress';
-        case 'Pendiente de Usuario': return 'status-default'; // Usamos 'default' para pendiente
+        case 'Pendiente de Usuario': return 'status-default'; 
         case 'Cerrada': return 'status-closed';
         default: return 'status-default';
     }
@@ -438,7 +412,7 @@ const estadoClass = (estadoTipo) => {
     background: #cbd5e1;
 }
 
-/* Estilos de Estado */
+
 .status-open,
 .status-in-progress,
 .status-closed,
@@ -471,9 +445,6 @@ const estadoClass = (estadoTipo) => {
     background-color: #f5f3ff;
 }
 
-/* ---------------------------------------------------------------------- */
-/* ESTILOS DE PESTAÑAS */
-/* ---------------------------------------------------------------------- */
 .tabs-nav {
     display: flex;
     border-bottom: 2px solid #e2e8f0;
@@ -563,10 +534,6 @@ const estadoClass = (estadoTipo) => {
     padding-top: 8px;
 }
 
-/* ---------------------------------------------------------------------- */
-/* ESTILOS DE LÍNEA DE TIEMPO */
-/* ---------------------------------------------------------------------- */
-
 .timeline {
     position: relative;
     padding-left: 30px; 
@@ -594,21 +561,20 @@ const estadoClass = (estadoTipo) => {
     border: 3px solid #ffffff; 
 }
 
-/* Colores para los tipos de seguimiento */
 .dot-asignación {
-    background-color: #3b82f6; /* Azul */
+    background-color: #3b82f6;
     box-shadow: 0 0 0 2px #3b82f6;
 }
 .dot-nota {
-    background-color: #fb923c; /* Naranja */
+    background-color: #fb923c;
     box-shadow: 0 0 0 2px #fb923c;
 }
 .dot-estado { 
-    background-color: #10b981; /* Verde (Cambio de Estado) */
+    background-color: #10b981;
     box-shadow: 0 0 0 2px #10b981;
 }
 .dot-solución {
-    background-color: #6366f1; /* Morado */
+    background-color: #6366f1;
     box-shadow: 0 0 0 2px #6366f1;
 }
 

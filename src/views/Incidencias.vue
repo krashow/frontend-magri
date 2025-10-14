@@ -138,7 +138,6 @@ onMounted(() => {
 
 const handleDetalleModalClose = () => {
     mostrarModal.value = false;
-    // Esto es vital para reflejar los cambios de asignación en la tabla del Dashboard
     cargarIncidencias(); 
 }
 
@@ -153,8 +152,6 @@ const cargarIncidencias = async () => {
         alert("❌ No se pudieron cargar las incidencias.")
     }
 }
-
-// Funciones de acción
 const verDetalle = async (id) => {
     try {
         const url = `http://localhost:8081/api/incidencias/detalle?id=${id}`;
