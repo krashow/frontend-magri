@@ -230,6 +230,7 @@ const formatFechaInput = (dateTimeInput) => {
     const [year, month, day] = datePart.split('-');
     return `${day}/${month}/${year}, ${timePart}`;
 };
+
 const estadoClass = (estadoTipo) => { 
     switch (estadoTipo) {
         case 'Abierta': return 'status-open';
@@ -423,22 +424,22 @@ const estadoClass = (estadoTipo) => {
 }
 
 .status-open {
-    color: #fb923c; /* Abierta */
+    color: #fb923c;
     background-color: #fff7ed;
 }
 
 .status-in-progress {
-    color: #3b82f6; /* En Proceso / Verificación */
+    color: #3b82f6;
     background-color: #eff6ff;
 }
 
 .status-closed {
-    color: #10b981; /* Cerrada */
+    color: #10b981; 
     background-color: #ecfdf5;
 }
 
 .status-default { 
-    color: #7c3aed; /* Pendiente de Usuario */
+    color: #7c3aed;
     background-color: #f5f3ff;
 }
 

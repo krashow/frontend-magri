@@ -1,8 +1,6 @@
 <template>
   <div class="dashboard">
-    <!-- Barra lateral -->
     <aside class="sidebar">
-      <!-- Logo -->
       <div class="sidebar-logo">
         <img src="/logo.png" alt="Logo" />
       </div>
@@ -61,8 +59,6 @@
         </button>
       </div>
     </aside>
-
-    <!-- Contenido principal -->
     <main class="main-content">
       <header class="header">
         <div class="user-info">
@@ -70,8 +66,6 @@
           <span>{{ userName }}</span>
         </div>
       </header>
-
-      <!-- Contenido dinámico -->
       <slot></slot>
     </main>
   </div>

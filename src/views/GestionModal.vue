@@ -65,7 +65,6 @@ const emit = defineEmits(['close', 'save']);
 </script>
 
 <style scoped>
-/* --- ESTILOS DEL MODAL DE GESTIÓN --- */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -132,7 +131,6 @@ const emit = defineEmits(['close', 'save']);
 }
 
 .estado-badge {
-    /* Estilos copiados de Notificaciones.vue para que se vean bien */
     display: inline-block;
     padding: 4px 8px;
     border-radius: 12px;
@@ -141,7 +139,6 @@ const emit = defineEmits(['close', 'save']);
     text-transform: capitalize;
 }
 
-/* Clases de estado copiadas para el modal */
 .estado-rojo { background-color: #ffe0e0; color: #cc0000; }
 .estado-amarillo { background-color: #fffacd; color: #b8860b; }
 .estado-verde { background-color: #e0fff0; color: #008000; }
@@ -196,8 +193,7 @@ hr {
 }
 
 .submit-btn {
-    background-color: #4CAF50; /* Verde */
-    color: white;
+    background-color: #4CAF50;
     border: none;
 }
 
