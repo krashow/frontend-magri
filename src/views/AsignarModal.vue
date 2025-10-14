@@ -115,35 +115,27 @@ export default {
         this.cargandoResponsables = false;
       }
     },
-
     async asignarIncidencia() {
       if (!this.idResponsableSeleccionado) {
         this.errorMensaje = "Debes seleccionar un responsable.";
         return;
       }
-
       this.cargando = true;
       this.errorMensaje = null;
-
       const asignacionData = {
         idIncidencia: this.incidencia.id,
         idResponsable: this.idResponsableSeleccionado,
         observacion: this.observacion,
       };
-
       console.log("Datos de asignación a enviar:", asignacionData);
-
       try {
         const endpoint = `${this.BASE_URL}/api/incidencias/asignar-responsable`;
-
         const response = await axios.post(endpoint, asignacionData);
-
         const incidenciaActualizada = response.data;
         this.$emit(
           "mensajeGlobal", 
           `Incidencia #${incidenciaActualizada.id} asignada a ${incidenciaActualizada.responsable.nombre} correctamente.`
         );
-        
         this.$emit("asignacionExitosa", incidenciaActualizada); 
         this.$emit("close");
         console.log(
@@ -152,7 +144,6 @@ export default {
         console.log("Respuesta del servidor:", incidenciaActualizada);
       } catch (error) {
         console.error("❌ Error al asignar:", error.response || error);
-        
         let mensaje = "Error de red/servidor. Intenta de nuevo.";
         
         if (error.response) {
@@ -173,9 +164,7 @@ export default {
                     mensaje = `Error al asignar: ${error.response.status} - ${error.response.statusText || 'Error desconocido'}.`;
             }
         }
-        
-        this.errorMensaje = mensaje;
-        
+        this.errorMensaje = mensaje;        
       } finally {
         this.cargando = false;
       }

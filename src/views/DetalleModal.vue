@@ -131,7 +131,6 @@ const props = defineProps({
 defineEmits(['cerrar', 'editar']);
 
 const activeTab = ref('vista');
-
 const mostrarAsignarModal = ref(false);
 const incidenciaAsignacion = ref(null); 
 
@@ -225,14 +224,12 @@ const formatFecha = (dateTimeStr) => {
         hour: '2-digit', minute: '2-digit'
     });
 };
-
 const formatFechaInput = (dateTimeInput) => {
     if (!dateTimeInput) return 'N/A';
     const [datePart, timePart] = dateTimeInput.split('T');
     const [year, month, day] = datePart.split('-');
     return `${day}/${month}/${year}, ${timePart}`;
 };
-
 const estadoClass = (estadoTipo) => { 
     switch (estadoTipo) {
         case 'Abierta': return 'status-open';

@@ -7,8 +7,6 @@
   overflow: hidden;
   background: #f5f7fa;
 }
-
-/* Sidebar mejorado */
 .sidebar {
   width: 260px;
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
@@ -19,8 +17,6 @@
   padding: 0;
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
 }
-
-/* Logo en el sidebar */
 .sidebar-logo {
   padding: 20px 20px 1px 24px;
   display: flex;
@@ -29,20 +25,17 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 0px;
 }
-
 .sidebar-logo img {
   max-width: 160px;
   height: auto;
   max-height: 60px;
   object-fit: contain;
 }
-
 .menu ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-
 .menu li {
   display: flex;
   align-items: center;
@@ -55,23 +48,18 @@
   font-weight: 500;
   font-size: 15px;
 }
-
 .menu li:hover {
   background: rgba(59, 130, 246, 0.15);
   transform: translateX(4px);
 }
-
 .menu li i {
   font-size: 18px;
   color: #94a3b8;
   transition: color 0.3s ease;
 }
-
 .menu li:hover i {
   color: #60a5fa;
 }
-
-/* Botones de ajustes y cerrar sesión */
 .sidebar-bottom {
   display: flex;
   justify-content: center;
@@ -80,7 +68,6 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   margin: 0 12px;
 }
-
 .icon-btn {
   background: rgba(255, 255, 255, 0.08);
   border: none;
@@ -95,19 +82,15 @@
   align-items: center;
   justify-content: center;
 }
-
 .icon-btn:hover {
   background: rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
   color: #fff;
 }
-
 .logout:hover {
   background: rgba(239, 68, 68, 0.2);
   color: #ef4444;
 }
-
-/* Contenido principal */
 .main-content {
   flex: 1;
   background: #f5f7fa;
@@ -117,7 +100,9 @@
   overflow-y: auto;
 }
 
-/* Header mejorado */
+
+
+
 .header {
   display: flex;
   justify-content: flex-end;
@@ -129,8 +114,6 @@
   margin-bottom: 32px;
   border: 1px solid #e2e8f0;
 }
-
-/* Usuario arriba derecha */
 .user-info {
   display: flex;
   align-items: center;
@@ -143,23 +126,20 @@
   border-radius: 12px;
   transition: all 0.3s ease;
 }
-
 .user-info:hover {
   background: #f1f5f9;
 }
-
 .user-info i {
   font-size: 28px;
   color: #3b82f6;
 }
-
-/* Tarjetas mejoradas */
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;
   margin-bottom: 32px;
 }
+
 
 .card {
   background: #ffffff;
@@ -172,7 +152,6 @@
   position: relative;
   overflow: hidden;
 }
-
 .card::before {
   content: '';
   position: absolute;
@@ -184,17 +163,14 @@
   opacity: 0;
   transition: opacity 0.3s ease;
 }
-
 .card:hover {
   transform: translateY(-6px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
   border-color: #cbd5e1;
 }
-
 .card:hover::before {
   opacity: 1;
 }
-
 .card h3 {
   font-size: 14px;
   color: #64748b;
@@ -203,7 +179,6 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .card p {
   font-size: 36px;
   font-weight: 700;
@@ -214,8 +189,6 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
-/* Resumen mejorado */
 .summary {
   background: #ffffff;
   padding: 32px;
@@ -224,18 +197,15 @@
   border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
 }
-
 .summary:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
-
 .summary h3 {
   font-size: 20px;
   color: #1e293b;
   margin-bottom: 16px;
   font-weight: 700;
 }
-
 .summary p {
   font-size: 15px;
   color: #64748b;
@@ -243,32 +213,28 @@
   text-align: left;
   margin: 0;
 }
-
-/* Responsive */
 @media (max-width: 1024px) {
   .stats {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-
 @media (max-width: 768px) {
   .sidebar {
     width: 80px;
   }
-  
   .menu li span {
     display: none;
   }
-  
   .main-content {
     padding: 20px;
   }
-  
   .stats {
     grid-template-columns: 1fr;
   }
 }
-/* --- ESTILOS ESPECÍFICOS DEL FORMULARIO DE REGISTRO --- */
+
+
+
 
 .form-section {
     background: #ffffff;
@@ -286,22 +252,16 @@
     border-bottom: 2px solid #f1f5f9;
     padding-bottom: 12px;
 }
-
-/* Contenedor general de cada campo */
 .form-group {
     margin-bottom: 20px;
 }
-
-/* Estilo para las etiquetas (labels) */
 .form-group label {
     display: block;
     font-size: 14px;
     font-weight: 600;
-    color: #475569; /* Gris oscuro para el texto */
+    color: #475569; 
     margin-bottom: 8px;
 }
-
-/* Estilo para Combos (<select>) y Campos de Texto/Área */
 .form-group select,
 .form-group input[type="text"],
 .form-group input[type="date"],
@@ -310,43 +270,32 @@
     padding: 12px 16px;
     font-size: 15px;
     color: #1e293b;
-    background-color: #f8fafc; /* Fondo muy claro */
-    border: 1px solid #cbd5e1; /* Borde suave */
+    background-color: #f8fafc; 
+    border: 1px solid #cbd5e1;
     border-radius: 10px;
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
     transition: all 0.3s ease;
-    appearance: none; /* Quita el estilo nativo en selects */
+    appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
 }
-
-/* Estilo de enfoque (focus) */
 .form-group select:focus,
 .form-group input[type="text"]:focus,
 .form-group input[type="date"]:focus,
 .form-group textarea:focus {
-    border-color: #3b82f6; /* Borde azul primario */
+    border-color: #3b82f6; 
     background-color: #ffffff;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); /* Efecto de anillo sutil */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); 
 }
-
-/* Estilo específico para Textarea (Observación) */
 .form-group textarea {
-    resize: vertical; /* Permite redimensionar verticalmente */
-    min-height: 120px; /* Altura mínima para la observación */
+    resize: vertical; 
+    min-height: 120px; 
     line-height: 1.5;
 }
-
-/* Estilo para Select (añade una flecha si es necesario, o usa la nativa si appearance: none no se aplica bien) */
 .form-group select {
-    /* Si appearance: none se aplica, se recomienda usar un ícono de flecha personalizado
-       Pero lo mantendremos simple y moderno confiando en el estilo plano */
     cursor: pointer;
 }
-
-
-/* Estilos para el contenedor de preguntas dinámicas */
 .preguntas-box {
     background: #f8fafc;
     padding: 24px;
@@ -361,8 +310,6 @@
     margin-bottom: 20px;
     font-weight: 600;
 }
-
-/* Botón de envío (usa el estilo btn-login existente o añade este) */
 .btn-login {
     background: #3b82f6;
     color: white;
@@ -375,20 +322,17 @@
     width: 100%;
     margin-top: 20px;
 }
-
 .btn-login:hover {
     background: #2563eb;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     transform: translateY(-2px);
 }
-/* Estilos para Checkbox */
 .checkbox-group {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-top: 10px;
 }
-
 .checkbox-group input[type="checkbox"] {
     width: 20px;
     height: 20px;
@@ -398,7 +342,6 @@
     background-color: #ffffff; 
     border: 1px solid #cbd5e1;
 }
-
 .checkbox-group label {
     margin-bottom: 0;
     font-weight: 400; 
@@ -418,17 +361,13 @@
     font-size: 15px;
     margin-top: 5px;
 }
-
 .btn-file-upload:hover {
     background: #334155;
     transform: translateY(-1px);
 }
-
 .btn-file-upload i {
     font-size: 16px;
 }
-
-/* Estilo para mostrar el nombre del archivo */
 .file-name-display {
     display: block;
     margin-top: 10px;
@@ -461,9 +400,8 @@
     border-radius: 16px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     border: 1px solid #e2eeef;
-    overflow-x: auto; /* Permite desplazamiento horizontal si la tabla es muy ancha */
+    overflow-x: auto;
 }
-
 .table-section h2 {
     font-size: 24px;
     color: #1e293b;
@@ -472,37 +410,31 @@
     border-bottom: 2px solid #f1f5f9;
     padding-bottom: 12px;
 }
-
 .table-container {
-    max-height: 70vh; /* Limita la altura del contenedor de la tabla */
-    overflow-y: auto; /* Permite desplazamiento vertical dentro del contenedor */
+    max-height: 70vh; 
+    overflow-y: auto; 
 }
-
-/* Estilos de la tabla */
 .data-table {
     width: 100%;
-    border-collapse: separate; /* Permite bordes redondeados en las celdas */
-    border-spacing: 0 10px; /* Espacio entre filas */
+    border-collapse: separate; 
+    border-spacing: 0 10px;
 }
-
 .data-table th,
 .data-table td {
     padding: 12px 18px;
     text-align: left;
     font-size: 14px;
 }
-
 .data-table thead th {
-    background-color: #f1f5f9; /* Fondo gris claro para el encabezado */
+    background-color: #f1f5f9;
     color: #475569;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    position: sticky; /* Fija el encabezado al hacer scroll */
+    position: sticky; 
     top: 0;
     z-index: 10;
 }
-
 .data-table tbody tr {
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
@@ -510,18 +442,14 @@
     transition: all 0.2s ease;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
-
 .data-table tbody tr:hover {
     background-color: #f8fafc;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     transform: translateY(-1px);
 }
-
-/* Estilos para el campo de estado */
 .data-table td {
     vertical-align: middle;
 }
-
 .data-table td.status-open,
 .data-table td.status-in-progress,
 .data-table td.status-closed {
@@ -532,23 +460,18 @@
     display: inline-block;
     min-width: 90px;
 }
-
 .status-open {
-    color: #fb923c; /* Naranja para Abierta */
+    color: #fb923c; 
     background-color: #fff7ed;
 }
-
 .status-in-progress {
-    color: #3b82f6; /* Azul para En Proceso */
+    color: #3b82f6;
     background-color: #eff6ff;
 }
-
 .status-closed {
-    color: #10b981; /* Verde para Cerrada */
+    color: #10b981;
     background-color: #ecfdf5;
 }
-
-/* Botones de acción en la tabla */
 .btn-action {
     background: none;
     border: none;
@@ -559,24 +482,18 @@
     border-radius: 6px;
     transition: all 0.2s ease;
 }
-
 .btn-action:hover {
     background-color: #e2e8f0;
 }
-
 .btn-action.view {
-    color: #6366f1; /* Púrpura */
+    color: #6366f1;
 }
-
 .btn-action.assign {
-    color: #f97316; /* Naranja */
+    color: #f97316; 
 }
-
 .btn-action.edit {
-    color: #0ea5e9; /* Azul cian */
+    color: #0ea5e9;
 }
-
-/* Mensaje sin datos */
 .no-data {
     text-align: center;
     padding: 40px;
@@ -603,49 +520,40 @@
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
-
 .user-table-section h2 {
   margin-bottom: 15px;
   color: #333;
   text-align: center;
   font-size: 1.5rem;
 }
-
 .user-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
 }
-
 .user-table th, .user-table td {
   padding: 15px 15px;
   border-bottom: 1px solid #ddd;
 }
-
 .user-table th {
   background-color: #005f99;
   color: white;
 }
-
 .user-table tr:hover {
   background-color: #f4f4f4;
 }
-
 .btn-edit, .btn-delete {
   border: none;
   background: none;
   cursor: pointer;
   font-size: 1rem;
 }
-
 .btn-edit {
   color: #007bff;
 }
-
 .btn-delete {
   color: #dc3545;
 }
-
 .btn-edit:hover, .btn-delete:hover {
   opacity: 0.7;
 }
@@ -659,55 +567,45 @@
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
-
 .report-actions h3 {
   text-align: center;
   color: #222;
   margin-bottom: 20px;
   font-size: 1.3rem;
 }
-
 .actions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 15px;
   margin-bottom: 25px;
 }
-
-/* Historial de reportes */
 .report-log {
   background: #f8f9fa;
   padding: 15px;
   border-radius: 8px;
   border-left: 4px solid #007bff;
 }
-
 .report-log h4 {
   color: #333;
   margin-bottom: 10px;
 }
-
 .report-log ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-
 .report-log li {
   margin-bottom: 6px;
   color: #555;
 }
-
 .report-log i {
   color: #28a745;
   margin-right: 5px;
 }
-/* === SELECT PERSONALIZADO DE FILTRO === */
 .report-filters select {
-  appearance: none; /* Elimina el estilo del sistema */
+  appearance: none; 
   -webkit-appearance: none;
   -moz-appearance: none;
-
   background-color: #ffffff;
   border: 1.5px solid #007bff;
   border-radius: 8px;
@@ -720,28 +618,21 @@
   font-family: inherit;
   position: relative;
 }
-
-/* Sombra y color al enfocar */
 .report-filters select:focus {
   border-color: #0056b3;
   box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
 }
-
-/* Efecto hover */
 .report-filters select:hover {
   border-color: #0056b3;
 }
-
-/* Agrega una flecha personalizada */
 .report-filters {
   position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
 .report-filters::after {
-  content: "\f078"; /* icono Font Awesome: fa-chevron-down */
+  content: "\f078"; 
   font-family: "Font Awesome 5 Free";
   font-weight: 900;
   position: absolute;
@@ -750,8 +641,3 @@
   color: #007bff;
   font-size: 0.8rem;
 }
-
-
-
-
-
