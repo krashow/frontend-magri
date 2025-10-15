@@ -328,8 +328,8 @@ const estadoClass = (estadoTipo) => {
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
+  max-width: 1200px;
+  max-height: 95vh;
   overflow-y: auto;
   position: relative;
   border: 1px solid #e2e8f0;
