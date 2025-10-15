@@ -123,29 +123,40 @@
               incidencia en memoria.
             </p>
           </div>
-
-          <div class="timeline">
-            <div
-              v-for="(item, index) in seguimientoSimulado"
-              :key="index"
-              class="timeline-item"
-            >
-              <div
-                class="timeline-dot"
-                :class="`dot-${item.tipo.toLowerCase().replace(' ', '-')}`"
-              ></div>
-              <div class="timeline-content">
-                <p class="timeline-title">
-                  <strong>{{ item.titulo }}</strong>
-                </p>
-                <p class="timeline-meta">
-                  {{ item.fecha }} por **{{ item.usuario }}**
-                </p>
-                <div class="timeline-description">{{ item.descripcion }}</div>
-              </div>
-            </div>
+          <div class="tracking-table-container">
+            <table class="tracking-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Tipo</th>
+                  <th>Título/Estado</th>
+                  <th>Usuario</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(item, index) in seguimientoSimulado"
+                  :key="index"
+                  :class="`row-${item.tipo.toLowerCase().replace(' ', '-')}`"
+                >
+                  <td>{{ item.fecha }}</td>
+                  <td>
+                    <span :class="`tipo-badge badge-${item.tipo.toLowerCase().replace(' ', '-')}`">
+                      {{ item.tipo }}
+                    </span>
+                  </td>
+                  <td><strong>{{ item.titulo }}</strong></td>
+                  <td>{{ item.usuario }}</td>
+                  <td>{{ item.descripcion }}</td>
+                </tr>
+                <tr v-if="seguimientoSimulado.length === 0">
+                    <td colspan="5" class="no-tracking-message">Aún no hay registros de seguimiento para esta incidencia.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </div>
+          </div>
       </div>
 
       <div class="action-buttons modal-footer">
@@ -180,7 +191,7 @@ const props = defineProps({
   },
 });
 
-defineEmits(["cerrar", "editar"]);
+const $emit = defineEmits(["cerrar", "editar"]); // Definición de $emit para usarlo en las funciones
 
 const activeTab = ref("vista");
 const mostrarAsignarModal = ref(false);
@@ -209,6 +220,7 @@ const incidenciaAsignadaHandler = (incidenciaActualizada) => {
 const mostrarMensajeExito = (mensaje) => {
   alert("✅ " + mensaje);
 };
+
 const estadosDisponibles = ref([
   "Abierta",
   "En Proceso",
@@ -216,29 +228,34 @@ const estadosDisponibles = ref([
   "Resuelta (Verificación)",
   "Cerrada",
 ]);
+
 const newSeguimiento = ref({
   descripcion: "",
   fecha: new Date().toISOString().substring(0, 16),
-  nuevoEstado: props.incidencia.estado.tipo,
+  // Aseguramos que el estado inicial sea el actual de la incidencia
+  nuevoEstado: props.incidencia.estado.tipo, 
 });
+
+// Estructura de seguimiento adaptada para la tabla
 const seguimientoSimulado = ref([
   {
     fecha: "12/10/2025, 14:30",
-    usuario: "Administrador",
-    tipo: "Incidencia",
-    titulo: "Incidencia creada",
+    usuario: "Sistema/Usuario",
+    tipo: "Registro", // Tipo: Registro Inicial
+    titulo: "Incidencia Creada",
     descripcion:
-      "Incidencia creada el 10 de octubre de 2025 a las 14:30., en el area de sistemas",
+      "Incidencia creada el 10 de octubre de 2025 a las 14:30, en el área de sistemas.",
   },
   {
     fecha: "13/10/2025, 09:15",
     usuario: "Administrador",
-    tipo: "Nota",
+    tipo: "Nota", // Tipo: Nota de seguimiento
     titulo: "Análisis Inicial Completado",
     descripcion:
       "Se realizó el análisis inicial. Se requiere validar un problema de configuración.",
   },
 ]);
+
 const agregarSeguimientoSimulado = () => {
   if (!newSeguimiento.value.descripcion) {
     alert(
@@ -248,6 +265,8 @@ const agregarSeguimientoSimulado = () => {
   }
 
   const fechaFormateada = formatFechaInput(newSeguimiento.value.fecha);
+  
+  // 1. Agregar el registro de la Nota
   const nuevoRegistro = {
     fecha: fechaFormateada,
     usuario: "Usuario Actual (Simulado)",
@@ -256,18 +275,28 @@ const agregarSeguimientoSimulado = () => {
     descripcion: newSeguimiento.value.descripcion,
   };
   seguimientoSimulado.value.push(nuevoRegistro);
+
+  // 2. Si el estado fue cambiado, agregar un registro de Estado
   if (newSeguimiento.value.nuevoEstado !== props.incidencia.estado.tipo) {
     const estadoAnterior = props.incidencia.estado.tipo;
+    // Actualizar el estado de la incidencia (Simulación)
     props.incidencia.estado.tipo = newSeguimiento.value.nuevoEstado;
+    
+    // Agregar el registro del cambio de estado
     seguimientoSimulado.value.push({
       fecha: fechaFormateada,
       usuario: "Sistema/Usuario Actual",
-      tipo: "Estado",
+      tipo: "Estado", // Tipo: Cambio de estado
       titulo: `Estado actualizado a "${props.incidencia.estado.tipo}"`,
       descripcion: `Cambio de estado de "${estadoAnterior}" a "${props.incidencia.estado.tipo}" registrado.`,
     });
   }
-  seguimientoSimulado.value.sort((a, b) => (a.fecha > b.fecha ? 1 : -1));
+
+  // Ordenar el seguimiento (simple, asumiendo un formato de fecha consistente)
+  // Aunque para una ordenación precisa, se recomendaría usar un timestamp
+  // seguimientoSimulado.value.sort((a, b) => (a.fecha > b.fecha ? 1 : -1));
+
+  // Resetear el formulario
   newSeguimiento.value.descripcion = "";
   newSeguimiento.value.fecha = new Date().toISOString().substring(0, 16);
   newSeguimiento.value.nuevoEstado = props.incidencia.estado.tipo;
@@ -284,8 +313,10 @@ const formatFecha = (dateTimeStr) => {
     minute: "2-digit",
   });
 };
+
 const formatFechaInput = (dateTimeInput) => {
   if (!dateTimeInput) return "N/A";
+  // Convertir formato YYYY-MM-DDTHH:mm a DD/MM/YYYY, HH:mm
   const [datePart, timePart] = dateTimeInput.split("T");
   const [year, month, day] = datePart.split("-");
   return `${day}/${month}/${year}, ${timePart}`;
@@ -309,6 +340,75 @@ const estadoClass = (estadoTipo) => {
 </script>
 
 <style scoped>
+.tracking-table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.tracking-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.tracking-table th,
+.tracking-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+}
+
+.tracking-table th {
+    background-color: #f0f4f7;
+    color: #333;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.tracking-table tbody tr:hover {
+    background-color: #f7f7f7;
+}
+
+/* Estilo para las filas especiales (opcional: añadir un ligero color de fondo) */
+.tracking-table .row-estado {
+    background-color: #e6f7ff; /* Azul claro para cambios de estado */
+}
+
+.tracking-table .row-registro {
+    background-color: #fffbe6; /* Amarillo claro para el registro inicial */
+}
+
+/* Estilos para las etiquetas de "Tipo" */
+.tipo-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    color: white;
+}
+
+.badge-nota {
+    background-color: #6c757d; /* Gris */
+}
+
+.badge-estado {
+    background-color: #007bff; /* Azul */
+}
+
+.badge-registro {
+    background-color: #ffc107; /* Amarillo/Naranja */
+    color: #333;
+}
+
+.no-tracking-message {
+    text-align: center;
+    padding: 20px;
+    color: #999;
+    font-style: italic;
+    background-color: #fcfcfc;
+}
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -328,8 +428,8 @@ const estadoClass = (estadoTipo) => {
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   width: 90%;
-  max-width: 1200px;
-  max-height: 95vh;
+  max-width: 1400px;
+  max-height: 95%;
   overflow-y: auto;
   position: relative;
   border: 1px solid #e2e8f0;
