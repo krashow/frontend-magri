@@ -250,7 +250,6 @@ const activeTab = ref("vista");
 const mostrarAsignarModal = ref(false);
 const incidenciaAsignacion = ref(null);
 
-// ... (Las funciones asignar, cerrarAsignarModal, incidenciaAsignadaHandler, mostrarMensajeExito se mantienen igual) ...
 
 const asignar = async (id) => {
   try {
@@ -275,8 +274,6 @@ const incidenciaAsignadaHandler = (incidenciaActualizada) => {
 const mostrarMensajeExito = (mensaje) => {
   alert("✅ " + mensaje);
 };
-
-// Nuevo: Lista de usuarios disponibles para la simulación
 const usuariosDisponibles = ref([
   "Administrador",
   "Kevin Agrada",
@@ -293,28 +290,22 @@ const estadosDisponibles = ref([
   "Resuelta (Verificación)",
   "Cerrada",
 ]);
-
-// Actualizado: Estructura de newSeguimiento con nuevos campos
 const newSeguimiento = ref({
   descripcion: "",
   fecha: new Date().toISOString().substring(0, 16),
   nuevoEstado: props.incidencia.estado.tipo,
-  responsablesInvolucrados: [], // Nuevo
-  nombreAdjunto: null, // Nuevo
+  responsablesInvolucrados: [],
+  nombreAdjunto: null, 
 });
 
-// Nuevo: Manejo de la selección de archivo
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
-    // Solo guardamos el nombre para la simulación
     newSeguimiento.value.nombreAdjunto = file.name;
   } else {
     newSeguimiento.value.nombreAdjunto = null;
   }
 };
-
-// Actualizado: Datos de seguimiento simulado con nuevos campos (involucrados y adjunto)
 const seguimientoSimulado = ref([
   {
     fecha: "12/10/2025, 14:30",
@@ -334,11 +325,9 @@ const seguimientoSimulado = ref([
     descripcion:
       "Se realizó el análisis inicial. Se requiere validar un problema de configuración.",
     involucrados: ["Administrador"],
-    adjuntoNombre: "log_error_131025.txt", // Ejemplo de adjunto
+    adjuntoNombre: "log_error_131025.txt",
   },
 ]);
-
-// Actualizado: Lógica para agregar el seguimiento con los nuevos campos
 const agregarSeguimientoSimulado = () => {
   if (!newSeguimiento.value.descripcion) {
     alert(
@@ -355,8 +344,7 @@ const agregarSeguimientoSimulado = () => {
     tipo: "Nota",
     titulo: "Nueva Nota de Seguimiento",
     descripcion: newSeguimiento.value.descripcion,
-    // Nuevos campos
-    involucrados: newSeguimiento.value.responsablesInvolucrados.slice(), // Clonamos el array
+    involucrados: newSeguimiento.value.responsablesInvolucrados.slice(), 
     adjuntoNombre: newSeguimiento.value.nombreAdjunto,
   };
   seguimientoSimulado.value.push(nuevoRegistro);
@@ -364,35 +352,26 @@ const agregarSeguimientoSimulado = () => {
   if (newSeguimiento.value.nuevoEstado !== props.incidencia.estado.tipo) {
     const estadoAnterior = props.incidencia.estado.tipo;
     props.incidencia.estado.tipo = newSeguimiento.value.nuevoEstado;
-    
-    // Registro de cambio de estado
     seguimientoSimulado.value.push({
       fecha: fechaFormateada,
       usuario: "Sistema/Usuario Actual",
       tipo: "Estado", 
       titulo: `Estado actualizado a "${props.incidencia.estado.tipo}"`,
       descripcion: `Cambio de estado de "${estadoAnterior}" a "${props.incidencia.estado.tipo}" registrado.`,
-      // Los cambios de estado no suelen llevar responsables/adjuntos específicos en el registro de la tabla
       involucrados: [],
       adjuntoNombre: null,
     });
   }
-
-  // Restablecer el formulario de seguimiento
   newSeguimiento.value.descripcion = "";
   newSeguimiento.value.fecha = new Date().toISOString().substring(0, 16);
   newSeguimiento.value.nuevoEstado = props.incidencia.estado.tipo;
-  newSeguimiento.value.responsablesInvolucrados = []; // Limpiar responsables
-  newSeguimiento.value.nombreAdjunto = null; // Limpiar adjunto
-
-  // Si se seleccionó un archivo, debemos resetear el campo de entrada de archivo para que permita subir el mismo archivo de nuevo si se desea
+  newSeguimiento.value.responsablesInvolucrados = [];
+  newSeguimiento.value.nombreAdjunto = null; 
   const fileInput = document.getElementById('adjuntoSeguimiento');
   if (fileInput) {
     fileInput.value = '';
   }
 };
-
-// ... (Las funciones formatFecha, formatFechaInput, y estadoClass se mantienen igual) ...
 
 const formatFecha = (dateTimeStr) => {
   if (!dateTimeStr) return "N/A";
