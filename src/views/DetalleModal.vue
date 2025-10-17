@@ -191,7 +191,7 @@ const props = defineProps({
   },
 });
 
-const $emit = defineEmits(["cerrar", "editar"]); // Definición de $emit para usarlo en las funciones
+const $emit = defineEmits(["cerrar", "editar"]); 
 
 const activeTab = ref("vista");
 const mostrarAsignarModal = ref(false);
@@ -232,16 +232,13 @@ const estadosDisponibles = ref([
 const newSeguimiento = ref({
   descripcion: "",
   fecha: new Date().toISOString().substring(0, 16),
-  // Aseguramos que el estado inicial sea el actual de la incidencia
   nuevoEstado: props.incidencia.estado.tipo, 
 });
-
-// Estructura de seguimiento adaptada para la tabla
 const seguimientoSimulado = ref([
   {
     fecha: "12/10/2025, 14:30",
     usuario: "Sistema/Usuario",
-    tipo: "Registro", // Tipo: Registro Inicial
+    tipo: "Registro",
     titulo: "Incidencia Creada",
     descripcion:
       "Incidencia creada el 10 de octubre de 2025 a las 14:30, en el área de sistemas.",
@@ -249,7 +246,7 @@ const seguimientoSimulado = ref([
   {
     fecha: "13/10/2025, 09:15",
     usuario: "Administrador",
-    tipo: "Nota", // Tipo: Nota de seguimiento
+    tipo: "Nota", 
     titulo: "Análisis Inicial Completado",
     descripcion:
       "Se realizó el análisis inicial. Se requiere validar un problema de configuración.",
@@ -266,37 +263,26 @@ const agregarSeguimientoSimulado = () => {
 
   const fechaFormateada = formatFechaInput(newSeguimiento.value.fecha);
   
-  // 1. Agregar el registro de la Nota
   const nuevoRegistro = {
     fecha: fechaFormateada,
-    usuario: "Usuario Actual (Simulado)",
+    usuario: "Usuario Actual",
     tipo: "Nota",
     titulo: "Nueva Nota de Seguimiento",
     descripcion: newSeguimiento.value.descripcion,
   };
   seguimientoSimulado.value.push(nuevoRegistro);
-
-  // 2. Si el estado fue cambiado, agregar un registro de Estado
   if (newSeguimiento.value.nuevoEstado !== props.incidencia.estado.tipo) {
     const estadoAnterior = props.incidencia.estado.tipo;
-    // Actualizar el estado de la incidencia (Simulación)
     props.incidencia.estado.tipo = newSeguimiento.value.nuevoEstado;
     
-    // Agregar el registro del cambio de estado
     seguimientoSimulado.value.push({
       fecha: fechaFormateada,
       usuario: "Sistema/Usuario Actual",
-      tipo: "Estado", // Tipo: Cambio de estado
+      tipo: "Estado", 
       titulo: `Estado actualizado a "${props.incidencia.estado.tipo}"`,
       descripcion: `Cambio de estado de "${estadoAnterior}" a "${props.incidencia.estado.tipo}" registrado.`,
     });
   }
-
-  // Ordenar el seguimiento (simple, asumiendo un formato de fecha consistente)
-  // Aunque para una ordenación precisa, se recomendaría usar un timestamp
-  // seguimientoSimulado.value.sort((a, b) => (a.fecha > b.fecha ? 1 : -1));
-
-  // Resetear el formulario
   newSeguimiento.value.descripcion = "";
   newSeguimiento.value.fecha = new Date().toISOString().substring(0, 16);
   newSeguimiento.value.nuevoEstado = props.incidencia.estado.tipo;
@@ -316,7 +302,6 @@ const formatFecha = (dateTimeStr) => {
 
 const formatFechaInput = (dateTimeInput) => {
   if (!dateTimeInput) return "N/A";
-  // Convertir formato YYYY-MM-DDTHH:mm a DD/MM/YYYY, HH:mm
   const [datePart, timePart] = dateTimeInput.split("T");
   const [year, month, day] = datePart.split("-");
   return `${day}/${month}/${year}, ${timePart}`;
@@ -370,16 +355,13 @@ const estadoClass = (estadoTipo) => {
     background-color: #f7f7f7;
 }
 
-/* Estilo para las filas especiales (opcional: añadir un ligero color de fondo) */
 .tracking-table .row-estado {
-    background-color: #e6f7ff; /* Azul claro para cambios de estado */
+    background-color: #e6f7ff; 
 }
 
 .tracking-table .row-registro {
-    background-color: #fffbe6; /* Amarillo claro para el registro inicial */
+    background-color: #fffbe6;
 }
-
-/* Estilos para las etiquetas de "Tipo" */
 .tipo-badge {
     display: inline-block;
     padding: 4px 8px;
@@ -390,15 +372,15 @@ const estadoClass = (estadoTipo) => {
 }
 
 .badge-nota {
-    background-color: #6c757d; /* Gris */
+    background-color: #6c757d;
 }
 
 .badge-estado {
-    background-color: #007bff; /* Azul */
+    background-color: #007bff;
 }
 
 .badge-registro {
-    background-color: #ffc107; /* Amarillo/Naranja */
+    background-color: #ffc107;
     color: #333;
 }
 
