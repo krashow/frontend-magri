@@ -25,7 +25,7 @@
         <div v-show="activeTab === 'vista'" class="tab-content">
           <section class="info-section">
             <h3>Información Principal</h3>
-            <div class="data-grid">
+            <div class="data-group">
               <p>
                 <strong>Código:</strong> <span>{{ incidencia.codigoReferencia }}</span>
               </p>
@@ -43,12 +43,18 @@
                 <strong>Prioridad:</strong>
                 <span>{{ incidencia.prioridad ? incidencia.prioridad.nombre : "S/I" }}</span>
               </p>
+              <p class="full-row sla-status">
+                <strong>Fecha de Compromiso (SLA):</strong>
+                <span :class="slaClass(incidencia.fechaSLA)">{{ 
+                    incidencia.fechaSLA ? formatFecha(incidencia.fechaSLA) : "No establecido" 
+                }}</span>
+              </p>
             </div>
           </section>
 
           <section class="info-section">
             <h3>Referencia</h3>
-            <div class="data-grid">
+            <div class="data-group">
               <p>
                 <strong>Usuario:</strong>
                 <span>{{ incidencia.usuario ? incidencia.usuario.nombre : "S/I" }}</span>
@@ -66,12 +72,12 @@
 
           <section class="info-section detail-box">
             <h3>Detalle y Observaciones</h3>
-            <div class="detail-group">
+            <div class="description-box">
               <h4>Descripción (Respuestas del formulario):</h4>
-              <pre class="description-content">{{ incidencia.dscInc }}</pre>
+              <pre>{{ incidencia.dscInc }}</pre>
 
               <h4>Observación del Usuario:</h4>
-              <p class="description-content">
+              <p>
                 {{
                   incidencia.obsInc ||
                   "No se proporcionaron observaciones adicionales."
@@ -87,7 +93,7 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label for="fechaSeguimiento">Fecha y Hora</label>
+                <label for="fechaSeguimiento">Fecha y Hora de la Acción</label>
                 <input
                   type="datetime-local"
                   id="fechaSeguimiento"
@@ -110,8 +116,39 @@
                   </option>
                 </select>
               </div>
+              
+              <div class="form-group">
+                <label for="fechaCompromiso">Fecha de Compromiso (SLA)</label>
+                <input
+                  type="date"
+                  id="fechaCompromiso"
+                  v-model="newSeguimiento.fechaCompromiso"
+                />
+              </div>
             </div>
 
+            <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <label for="tipoSeguimiento">Tipo de Seguimiento</label>
+                    <select id="tipoSeguimiento" v-model="newSeguimiento.tipo">
+                        <option value="Nota">Nota</option>
+                        <option value="Escalamiento">Escalamiento</option>
+                        <option value="Solución Aplicada">Solución Aplicada</option>
+                        <option value="Requerimiento Info">Requerimiento de Información</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" style="max-width: 250px;">
+                    <label for="tiempoInvertido">Tiempo Estimado</label>
+                    <input
+                      type="text"
+                      id="tiempoInvertido"
+                      placeholder="Ej: 1h 30m o 45m"
+                      v-model="newSeguimiento.tiempoInvertido"
+                    />
+                </div>
+            </div>
+            
             <div class="form-group">
               <label>Responsables Involucrados (Opcional)</label>
               <div class="input-with-button">
@@ -129,7 +166,7 @@
                 <button
                   @click="addResponsable"
                   :disabled="!selectedResponsable"
-                  class="btn-icon"
+                  class="btn-icon add-resp"
                   title="Añadir responsable"
                 >
                   +
@@ -146,16 +183,15 @@
                 </span>
               </div>
             </div>
-            <div class="form-group">
-              <label for="descSeguimiento"
-                >Nota de Seguimiento (Obligatoria)</label
-              >
-              <textarea
-                id="descSeguimiento"
-                placeholder="Describe el avance, la acción realizada, o la razón del cambio de estado."
-                v-model="newSeguimiento.descripcion"
-              ></textarea>
-            </div>
+
+            <label for="descSeguimiento"
+              >Nota de Seguimiento (Obligatoria)</label
+            >
+            <textarea
+              id="descSeguimiento"
+              placeholder="Describe el avance, la acción realizada, o la razón del cambio de estado."
+              v-model="newSeguimiento.descripcion"
+            ></textarea>
 
             <div class="form-group">
               <label for="adjuntoSeguimiento">Adjuntar Archivo</label>
@@ -173,15 +209,24 @@
               >
             </div>
 
+            <button 
+                @click="notificarUsuario" 
+                class="btn-secondary notify" 
+                :disabled="!newSeguimiento.descripcion"
+                style="margin-right: 10px;"
+            >
+              <i class="fas fa-paper-plane"></i> Notificar al Usuario
+            </button>
+            
             <button
               @click="agregarSeguimientoSimulado"
-              class="btn-primary"
+              class="btn-primary edit"
             >
               Registrar Seguimiento
             </button>
           </section>
           
-          <hr />
+          <hr style="margin-top: 32px;" />
 
           <section class="tracking-log">
             <h3>Historial de Seguimiento</h3>
@@ -193,7 +238,7 @@
                     <th style="width: 80px;">Tipo</th>
                     <th style="width: 150px;">Título/Estado</th>
                     <th style="width: 100px;">Usuario</th>
-                    <th style="width: 180px;">Involucrados</th>
+                    <th style="width: 80px;">Tiempo</th> <th style="width: 180px;">Involucrados</th>
                     <th style="width: 150px;">Adjuntos</th>
                     <th>Descripción</th>
                   </tr>
@@ -212,7 +257,7 @@
                     </td>
                     <td><strong>{{ item.titulo }}</strong></td>
                     <td>{{ item.usuario }}</td>
-                    <td>
+                    <td>{{ item.tiempo || 'N/A' }}</td> <td>
                       <span v-if="item.involucrados && item.involucrados.length">
                         {{ item.involucrados.join(", ") }}
                       </span>
@@ -227,8 +272,7 @@
                     <td>{{ item.descripcion }}</td>
                   </tr>
                   <tr v-if="seguimientoSimulado.length === 0">
-                    <td colspan="7" class="no-tracking-message">
-                      Aún no hay registros de seguimiento para esta incidencia.
+                    <td colspan="8" class="no-tracking-message"> Aún no hay registros de seguimiento para esta incidencia.
                     </td>
                   </tr>
                 </tbody>
@@ -239,6 +283,13 @@
       </div>
 
       <footer class="action-buttons modal-footer">
+        <button 
+          v-if="incidencia.estado.tipo === 'En Proceso' || incidencia.estado.tipo === 'Pendiente de Usuario'"
+          @click="resolverIncidencia" 
+          class="btn-action resolve">
+          <i class="fas fa-check-circle"></i> Marcar como Resuelta
+        </button>
+
         <button @click="asignar(incidencia.id)" class="btn-action assign">
           <i class="fas fa-user-plus"></i> Asignar Incidencia
         </button>
@@ -261,13 +312,17 @@
 <script setup>
 import { defineProps, defineEmits, ref } from "vue";
 import axios from "axios";
-import AsignarModal from "/src/views/AsignarModal.vue";
+import AsignarModal from "/src/views/AsignarModal.vue"; 
 
 const props = defineProps({
   incidencia: {
     type: Object,
     required: true,
   },
+  fechaSLA: { 
+      type: String, 
+      default: null 
+  } 
 });
 
 const $emit = defineEmits(["cerrar", "editar"]); 
@@ -275,33 +330,8 @@ const $emit = defineEmits(["cerrar", "editar"]);
 const activeTab = ref("vista");
 const mostrarAsignarModal = ref(false);
 const incidenciaAsignacion = ref(null);
-
-// **NUEVO** para el mecanismo de selección uno por uno
 const selectedResponsable = ref("");
 
-const asignar = async (id) => {
-  try {
-    const url = `http://localhost:8081/api/incidencias/detalle?id=${id}`;
-    const resp = await axios.get(url);
-    incidenciaAsignacion.value = resp.data;
-    mostrarAsignarModal.value = true;
-  } catch (err) {
-    console.error("Error al cargar detalle para asignar:", err);
-    alert(
-      "❌ No se pudo cargar el detalle de la incidencia para la asignación."
-    );
-  }
-};
-const cerrarAsignarModal = () => {
-  mostrarAsignarModal.value = false;
-};
-const incidenciaAsignadaHandler = (incidenciaActualizada) => {
-  cerrarAsignarModal();
-  $emit("cerrar");
-};
-const mostrarMensajeExito = (mensaje) => {
-  alert("✅ " + mensaje);
-};
 const usuariosDisponibles = ref([
   "Administrador",
   "Kevin Agrada",
@@ -318,100 +348,160 @@ const estadosDisponibles = ref([
   "Resuelta (Verificación)",
   "Cerrada",
 ]);
+
+// Propiedad de la incidencia para simular el SLA (si no viene del prop)
+if (!props.incidencia.fechaSLA) {
+    props.incidencia.fechaSLA = ref(null);
+}
+
+// --- NUEVOS CAMPOS AÑADIDOS AL REGISTRO DE SEGUIMIENTO ---
 const newSeguimiento = ref({
   descripcion: "",
   fecha: new Date().toISOString().substring(0, 16),
   nuevoEstado: props.incidencia.estado.tipo,
   responsablesInvolucrados: [],
   nombreAdjunto: null, 
+  tiempoInvertido: "",          // <--- NUEVO: Tiempo de esfuerzo
+  fechaCompromiso: "",          // <--- NUEVO: Nuevo SLA
+  tipo: "Nota",                 // <--- NUEVO: Tipo de seguimiento
 });
 
-// **NUEVO** Lógica para añadir responsable uno por uno
+// --- Lógica de Manejo de Responsables (Tags) ---
+
 const addResponsable = () => {
     if (selectedResponsable.value && !newSeguimiento.value.responsablesInvolucrados.includes(selectedResponsable.value)) {
         newSeguimiento.value.responsablesInvolucrados.push(selectedResponsable.value);
         selectedResponsable.value = ""; 
     }
 };
-
 const removeResponsable = (responsable) => {
     newSeguimiento.value.responsablesInvolucrados = newSeguimiento.value.responsablesInvolucrados.filter(r => r !== responsable);
 };
 
+// --- Lógica de Manejo de Archivos ---
+
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
-  if (file) {
-    newSeguimiento.value.nombreAdjunto = file.name;
-  } else {
-    newSeguimiento.value.nombreAdjunto = null;
-  }
+  newSeguimiento.value.nombreAdjunto = file ? file.name : null;
 };
+
+// --- Función para Notificar Usuario (Nueva) ---
+
+const notificarUsuario = () => {
+    if (!newSeguimiento.value.descripcion) {
+        alert("❌ Debes escribir una nota de seguimiento para notificar al usuario.");
+        return;
+    }
+    // NOTA: En un entorno real, aquí se llamaría a una API para enviar un email o notificación
+    alert(`📧 Notificación enviada al usuario (${props.incidencia.usuario.nombre}) con la nota de seguimiento actual.`);
+};
+
+// --- Data Simulada para el Historial ---
+
 const seguimientoSimulado = ref([
+  {
+    fecha: "13/10/2025, 09:15",
+    usuario: "Administrador",
+    tipo: "Escalamiento", // Nuevo Tipo de Seguimiento
+    titulo: "Análisis Inicial y Escalamiento a Nivel 2",
+    descripcion:
+      "Se identificó un problema de configuración compleja que requiere intervención del equipo de Back-end. Se adjunta el archivo de log para revisión.",
+    involucrados: ["Administrador", "Kevin Agrada"],
+    adjuntoNombre: "log_error_131025.txt",
+    tiempo: "1h 0m", // Tiempo invertido
+  },
   {
     fecha: "12/10/2025, 14:30",
     usuario: "Sistema/Usuario",
     tipo: "Registro",
-    titulo: "Incidencia Creada",
+    titulo: "Incidencia Creada (Estado: Abierta)",
     descripcion:
-      "Incidencia creada el 10 de octubre de 2025 a las 14:30, en el área de sistemas.",
+      "Incidencia creada automáticamente por el sistema al enviar el formulario.",
     involucrados: ["Usuario Creador"],
     adjuntoNombre: null,
-  },
-  {
-    fecha: "13/10/2025, 09:15",
-    usuario: "Administrador",
-    tipo: "Nota", 
-    titulo: "Análisis Inicial Completado",
-    descripcion:
-      "Se realizó el análisis inicial. Se requiere validar un problema de configuración.",
-    involucrados: ["Administrador"],
-    adjuntoNombre: "log_error_131025.txt",
+    tiempo: null,
   },
 ]);
+
 const agregarSeguimientoSimulado = () => {
   if (!newSeguimiento.value.descripcion) {
-    alert(
-      "La nota de seguimiento es obligatoria para registrar una actividad."
-    );
+    alert("La nota de seguimiento es obligatoria para registrar una actividad.");
     return;
   }
 
   const fechaFormateada = formatFechaInput(newSeguimiento.value.fecha);
+  const estadoAnterior = props.incidencia.estado.tipo;
   
   const nuevoRegistro = {
     fecha: fechaFormateada,
     usuario: "Usuario Actual",
-    tipo: "Nota",
-    titulo: "Nueva Nota de Seguimiento",
+    tipo: newSeguimiento.value.tipo, 
+    titulo: `Acción registrada (${newSeguimiento.value.tipo})`,
     descripcion: newSeguimiento.value.descripcion,
     involucrados: newSeguimiento.value.responsablesInvolucrados.slice(), 
     adjuntoNombre: newSeguimiento.value.nombreAdjunto,
+    tiempo: newSeguimiento.value.tiempoInvertido || null,
   };
   seguimientoSimulado.value.unshift(nuevoRegistro); 
   
-  if (newSeguimiento.value.nuevoEstado !== props.incidencia.estado.tipo) {
-    const estadoAnterior = props.incidencia.estado.tipo;
+  if (newSeguimiento.value.nuevoEstado !== estadoAnterior) {
     props.incidencia.estado.tipo = newSeguimiento.value.nuevoEstado;
-    seguimientoSimulado.value.unshift({
+    seguimientoSimulado.value.unshift({ 
       fecha: fechaFormateada,
       usuario: "Sistema/Usuario Actual",
       tipo: "Estado", 
-      titulo: `Estado actualizado a "${props.incidencia.estado.tipo}"`,
-      descripcion: `Cambio de estado de "${estadoAnterior}" a "${props.incidencia.estado.tipo}" registrado.`,
+      titulo: `Cambio de Estado: ${estadoAnterior} → ${props.incidencia.estado.tipo}`,
+      descripcion: `El estado fue actualizado por el usuario.`,
       involucrados: [],
       adjuntoNombre: null,
+      tiempo: null,
     });
   }
+
+  if (newSeguimiento.value.fechaCompromiso) {
+      props.incidencia.fechaSLA = newSeguimiento.value.fechaCompromiso;
+  }
+  
   newSeguimiento.value.descripcion = "";
   newSeguimiento.value.fecha = new Date().toISOString().substring(0, 16);
   newSeguimiento.value.nuevoEstado = props.incidencia.estado.tipo;
   newSeguimiento.value.responsablesInvolucrados = [];
   newSeguimiento.value.nombreAdjunto = null; 
-  selectedResponsable.value = "";
+  newSeguimiento.value.tiempoInvertido = "";    
+  newSeguimiento.value.fechaCompromiso = "";   
+  newSeguimiento.value.tipo = "Nota"; 
+  selectedResponsable.value = ""; 
   const fileInput = document.getElementById('adjuntoSeguimiento');
   if (fileInput) {
     fileInput.value = '';
   }
+};
+
+const resolverIncidencia = () => {
+    const estadoActual = props.incidencia.estado.tipo;
+    if (estadoActual === 'En Proceso' || estadoActual === 'Pendiente de Usuario') {
+        const confirmacion = confirm(`¿Estás seguro de que deseas cambiar el estado a "Resuelta (Verificación)"?`);
+        if (confirmacion) {
+            const fechaFormateada = formatFechaInput(new Date().toISOString().substring(0, 16));
+            const estadoAnterior = props.incidencia.estado.tipo;
+            
+            props.incidencia.estado.tipo = 'Resuelta (Verificación)';
+            
+            seguimientoSimulado.value.unshift({ 
+                fecha: fechaFormateada,
+                usuario: "Usuario Actual (Acción Rápida)",
+                tipo: "Estado", 
+                titulo: `Resuelta (Verificación) por acción rápida.`,
+                descripcion: `Incidencia marcada como resuelta. Pendiente de la verificación final.`,
+                involucrados: [],
+                adjuntoNombre: null,
+                tiempo: null,
+            });
+            mostrarMensajeExito("Incidencia marcada como Resuelta para verificación. ✨");
+        }
+    } else {
+        alert("La incidencia debe estar en estado 'En Proceso' o 'Pendiente de Usuario' para usar esta acción rápida.");
+    }
 };
 
 const formatFecha = (dateTimeStr) => {
@@ -453,9 +543,141 @@ const estadoClass = (estadoTipo) => {
       return "status-default";
   }
 };
+
+const slaClass = (fechaSLA) => {
+    if (!fechaSLA) return '';
+    const diff = new Date(fechaSLA).getTime() - new Date().getTime();
+    const days = diff / (1000 * 60 * 60 * 24);
+
+    if (days < 0) return 'sla-overdue';
+    if (days < 1) return 'sla-warning';
+    return 'sla-ok'; 
+};
+
+const asignar = async (id) => {
+    try {
+        const url = `http://localhost:8081/api/incidencias/detalle?id=${id}`; 
+        const resp = await axios.get(url); 
+        incidenciaAsignacion.value = resp.data;
+        mostrarAsignarModal.value = true;
+    } catch (err) {
+        console.error("Error al cargar detalle para asignar:", err);
+        alert(
+            "❌ No se pudo cargar el detalle de la incidencia para la asignación."
+        );
+    }
+};
+const cerrarAsignarModal = () => {
+  mostrarAsignarModal.value = false;
+};
+const incidenciaAsignadaHandler = (incidenciaActualizada) => {
+  cerrarAsignarModal();
+  $emit("cerrar");
+};
+const mostrarMensajeExito = (mensaje) => {
+  alert("✅ " + mensaje);
+};
+
 </script>
 
 <style scoped>
+.modal-header h2 {
+    padding: 0;
+    margin: 0;
+    border-bottom: none;
+    background-color: transparent;
+    border-radius: 0;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.modal-header h2 {
+    padding: 0;
+    margin: 0;
+    border-bottom: none;
+    background-color: transparent;
+    border-radius: 0;
+}
+.input-with-button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.input-with-button select {
+  flex-grow: 1;
+}
+
+.btn-icon.add-resp {
+  background-color: #10b981; 
+  color: white;
+  border: none;
+  padding: 0 14px;
+  height: 36px;
+  border-radius: 6px;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-icon.add-resp:hover:not(:disabled) {
+  background-color: #059669;
+}
+
+.btn-icon.add-resp:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+.tags-container {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 5px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background-color: #f1f5f9;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #3b82f6; 
+    color: white;
+    padding: 5px 10px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.tag-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    margin-left: 5px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 2px;
+    transition: color 0.2s;
+}
+.involucrados-meta, .adjunto-meta {
+    font-weight: 500;
+    color: #475569;
+    margin-left: 10px;
+}
+
+
 .tracking-table-container {
     overflow-x: auto;
     margin-top: 20px;
@@ -659,18 +881,19 @@ const estadoClass = (estadoTipo) => {
   gap: 10px;
 }
 .btn-primary.edit {
-  background: #6366f1;
-  color: white;
+  background: #2952b9;
+  color: white; 
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: none;
+  border: 2px solid #2952b9; 
 }
 .btn-primary.edit:hover {
-  background: #4f46e5;
+  background: #5d74af;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  border-color: #5d74af;
 }
 
 .btn-secondary.back {
