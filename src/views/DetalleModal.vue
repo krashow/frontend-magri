@@ -1,8 +1,10 @@
 <template>
   <div class="modal-overlay" @click.self="$emit('cerrar')">
     <div class="modal-content">
-      <h2>Detalle de Incidencia #{{ incidencia.id }}</h2>
-      <button class="close-btn" @click="$emit('cerrar')">&times;</button>
+      <header class="modal-header">
+        <h2>Detalle de Incidencia #{{ incidencia.id }}</h2>
+        <button class="close-btn" @click="$emit('cerrar')">&times;</button>
+      </header>
 
       <div class="tabs-nav">
         <button
@@ -21,64 +23,71 @@
 
       <div class="modal-body">
         <div v-show="activeTab === 'vista'" class="tab-content">
-          <div class="data-group">
-            <p><strong>Código:</strong> {{ incidencia.codigoReferencia }}</p>
-            <p>
-              <strong>Fecha de Registro:</strong>
-              {{ formatFecha(incidencia.fechaRegistro) }}
-            </p>
-            <p>
-              <strong>Estado:</strong>
-              <span :class="estadoClass(incidencia.estado.tipo)">{{
-                incidencia.estado.tipo
-              }}</span>
-            </p>
-            <p>
-              <strong>Prioridad:</strong>
-              {{ incidencia.prioridad ? incidencia.prioridad.nombre : "S/I" }}
-            </p>
-          </div>
+          <section class="info-section">
+            <h3>Información Principal</h3>
+            <div class="data-grid">
+              <p>
+                <strong>Código:</strong> <span>{{ incidencia.codigoReferencia }}</span>
+              </p>
+              <p>
+                <strong>Fecha de Registro:</strong>
+                <span>{{ formatFecha(incidencia.fechaRegistro) }}</span>
+              </p>
+              <p>
+                <strong>Estado:</strong>
+                <span :class="['status-badge', estadoClass(incidencia.estado.tipo)]">{{
+                  incidencia.estado.tipo
+                }}</span>
+              </p>
+              <p>
+                <strong>Prioridad:</strong>
+                <span>{{ incidencia.prioridad ? incidencia.prioridad.nombre : "S/I" }}</span>
+              </p>
+            </div>
+          </section>
 
-          <h3>Referencia</h3>
-          <div class="data-group">
-            <p>
-              <strong>Usuario:</strong>
-              {{ incidencia.usuario ? incidencia.usuario.nombre : "S/I" }}
-            </p>
-            <p>
-              <strong>Área:</strong>
-              {{ incidencia.area ? incidencia.area.nombre : "S/I" }}
-            </p>
-            <p>
-              <strong>Categoría:</strong>
-              {{ incidencia.categoria ? incidencia.categoria.nombre : "S/I" }}
-            </p>
-          </div>
+          <section class="info-section">
+            <h3>Referencia</h3>
+            <div class="data-grid">
+              <p>
+                <strong>Usuario:</strong>
+                <span>{{ incidencia.usuario ? incidencia.usuario.nombre : "S/I" }}</span>
+              </p>
+              <p>
+                <strong>Área:</strong>
+                <span>{{ incidencia.area ? incidencia.area.nombre : "S/I" }}</span>
+              </p>
+              <p>
+                <strong>Categoría:</strong>
+                <span>{{ incidencia.categoria ? incidencia.categoria.nombre : "S/I" }}</span>
+              </p>
+            </div>
+          </section>
 
-          <h3>Detalle y Observaciones</h3>
-          <div class="description-box">
-            <h4>Descripción (Respuestas del formulario):</h4>
-            <pre>{{ incidencia.dscInc }}</pre>
+          <section class="info-section detail-box">
+            <h3>Detalle y Observaciones</h3>
+            <div class="detail-group">
+              <h4>Descripción (Respuestas del formulario):</h4>
+              <pre class="description-content">{{ incidencia.dscInc }}</pre>
 
-            <h4>Observación del Usuario:</h4>
-            <p>
-              {{
-                incidencia.obsInc ||
-                "No se proporcionaron observaciones adicionales."
-              }}
-            </p>
-          </div>
+              <h4>Observación del Usuario:</h4>
+              <p class="description-content">
+                {{
+                  incidencia.obsInc ||
+                  "No se proporcionaron observaciones adicionales."
+                }}
+              </p>
+            </div>
+          </section>
         </div>
 
         <div v-show="activeTab === 'seguimiento'" class="tab-content">
-          <h3>Registro de Actividad y Seguimiento</h3>
-
-          <div class="new-tracking-form">
+          <section class="new-tracking-form">
             <h4>Añadir Seguimiento y/o Cambiar Estado</h4>
 
             <div class="form-row">
               <div class="form-group">
-                <label for="fechaSeguimiento">Fecha y Hora:</label>
+                <label for="fechaSeguimiento">Fecha y Hora</label>
                 <input
                   type="datetime-local"
                   id="fechaSeguimiento"
@@ -87,7 +96,7 @@
               </div>
 
               <div class="form-group">
-                <label for="estadoSeguimiento">Nuevo Estado:</label>
+                <label for="estadoSeguimiento">Nuevo Estado</label>
                 <select
                   id="estadoSeguimiento"
                   v-model="newSeguimiento.nuevoEstado"
@@ -104,38 +113,52 @@
             </div>
 
             <div class="form-group">
-              <label for="responsableSeguimiento"
-                >Responsables Involucrados (Opcional):</label
-              >
-              <select
-                id="responsableSeguimiento"
-                v-model="newSeguimiento.responsablesInvolucrados"
-                multiple
-              >
-                <option
-                  v-for="usuario in usuariosDisponibles"
-                  :key="usuario"
-                  :value="usuario"
+              <label>Responsables Involucrados (Opcional)</label>
+              <div class="input-with-button">
+                <select v-model="selectedResponsable" class="flex-grow">
+                  <option disabled value="">Selecciona un usuario</option>
+                  <option
+                    v-for="usuario in usuariosDisponibles"
+                    :key="usuario"
+                    :value="usuario"
+                    :disabled="newSeguimiento.responsablesInvolucrados.includes(usuario)"
+                  >
+                    {{ usuario }}
+                  </option>
+                </select>
+                <button
+                  @click="addResponsable"
+                  :disabled="!selectedResponsable"
+                  class="btn-icon"
+                  title="Añadir responsable"
                 >
-                  {{ usuario }}
-                </option>
-              </select>
-              <small class="form-text"
-                >Mantén la tecla Ctrl/Cmd presionada para seleccionar
-                múltiples.</small
-              >
+                  +
+                </button>
+              </div>
+              <div v-if="newSeguimiento.responsablesInvolucrados.length" class="tags-container">
+                <span
+                  v-for="resp in newSeguimiento.responsablesInvolucrados"
+                  :key="resp"
+                  class="tag"
+                >
+                  {{ resp }}
+                  <button @click="removeResponsable(resp)" class="tag-close">&times;</button>
+                </span>
+              </div>
             </div>
-            <label for="descSeguimiento"
-              >Nota de Seguimiento (Obligatoria):</label
-            >
-            <textarea
-              id="descSeguimiento"
-              placeholder="Describe el avance, la acción realizada, o la razón del cambio de estado."
-              v-model="newSeguimiento.descripcion"
-            ></textarea>
+            <div class="form-group">
+              <label for="descSeguimiento"
+                >Nota de Seguimiento (Obligatoria)</label
+              >
+              <textarea
+                id="descSeguimiento"
+                placeholder="Describe el avance, la acción realizada, o la razón del cambio de estado."
+                v-model="newSeguimiento.descripcion"
+              ></textarea>
+            </div>
 
             <div class="form-group">
-              <label for="adjuntoSeguimiento">Adjuntar Archivo:</label>
+              <label for="adjuntoSeguimiento">Adjuntar Archivo</label>
               <input
                 type="file"
                 id="adjuntoSeguimiento"
@@ -149,77 +172,80 @@
                 >Ningún archivo seleccionado.</small
               >
             </div>
+
             <button
               @click="agregarSeguimientoSimulado"
-              class="btn-primary edit"
+              class="btn-primary"
             >
               Registrar Seguimiento
             </button>
-            <p class="simulation-note">
-              ✅ Esta acción es una; actualiza el modal y el estado de la
-              incidencia en memoria.
-            </p>
-          </div>
-          <div class="tracking-table-container">
-            <table class="tracking-table">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Tipo</th>
-                  <th>Título/Estado</th>
-                  <th>Usuario</th>
-                  <th>Involucrados</th>
-                  <th>Adjuntos</th>
-                  <th>Descripción</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(item, index) in seguimientoSimulado"
-                  :key="index"
-                  :class="`row-${item.tipo.toLowerCase().replace(' ', '-')}`"
-                >
-                  <td>{{ item.fecha }}</td>
-                  <td>
-                    <span :class="`tipo-badge badge-${item.tipo.toLowerCase().replace(' ', '-')}`">
-                      {{ item.tipo }}
-                    </span>
-                  </td>
-                  <td><strong>{{ item.titulo }}</strong></td>
-                  <td>{{ item.usuario }}</td>
-                  <td>
-                    <span v-if="item.involucrados && item.involucrados.length">
-                      {{ item.involucrados.join(", ") }}
-                    </span>
-                    <span v-else>N/A</span>
-                  </td>
-                  <td>
-                    <span v-if="item.adjuntoNombre" class="adjunto-tag">
-                      📎 {{ item.adjuntoNombre }}
-                    </span>
-                    <span v-else>N/A</span>
-                  </td>
-                  <td>{{ item.descripcion }}</td>
-                </tr>
-                <tr v-if="seguimientoSimulado.length === 0">
-                  <td colspan="7" class="no-tracking-message">
-                    Aún no hay registros de seguimiento para esta incidencia.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          </section>
+          
+          <hr />
+
+          <section class="tracking-log">
+            <h3>Historial de Seguimiento</h3>
+            <div class="tracking-table-container">
+              <table class="tracking-table">
+                <thead>
+                  <tr>
+                    <th style="width: 100px;">Fecha</th>
+                    <th style="width: 80px;">Tipo</th>
+                    <th style="width: 150px;">Título/Estado</th>
+                    <th style="width: 100px;">Usuario</th>
+                    <th style="width: 180px;">Involucrados</th>
+                    <th style="width: 150px;">Adjuntos</th>
+                    <th>Descripción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(item, index) in seguimientoSimulado"
+                    :key="index"
+                    :class="`row-${item.tipo.toLowerCase().replace(' ', '-')}`"
+                  >
+                    <td>{{ item.fecha }}</td>
+                    <td>
+                      <span :class="['tipo-badge', `badge-${item.tipo.toLowerCase().replace(' ', '-')}`]">
+                        {{ item.tipo }}
+                      </span>
+                    </td>
+                    <td><strong>{{ item.titulo }}</strong></td>
+                    <td>{{ item.usuario }}</td>
+                    <td>
+                      <span v-if="item.involucrados && item.involucrados.length">
+                        {{ item.involucrados.join(", ") }}
+                      </span>
+                      <span v-else>N/A</span>
+                    </td>
+                    <td>
+                      <span v-if="item.adjuntoNombre" class="adjunto-tag">
+                        📎 {{ item.adjuntoNombre }}
+                      </span>
+                      <span v-else>N/A</span>
+                    </td>
+                    <td>{{ item.descripcion }}</td>
+                  </tr>
+                  <tr v-if="seguimientoSimulado.length === 0">
+                    <td colspan="7" class="no-tracking-message">
+                      Aún no hay registros de seguimiento para esta incidencia.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
       </div>
 
-      <div class="action-buttons modal-footer">
+      <footer class="action-buttons modal-footer">
         <button @click="asignar(incidencia.id)" class="btn-action assign">
           <i class="fas fa-user-plus"></i> Asignar Incidencia
         </button>
         <button @click="$emit('cerrar')" class="btn-secondary back">
           Cerrar
         </button>
-      </div>
+      </footer>
     </div>
   </div>
 
@@ -250,6 +276,8 @@ const activeTab = ref("vista");
 const mostrarAsignarModal = ref(false);
 const incidenciaAsignacion = ref(null);
 
+// **NUEVO** para el mecanismo de selección uno por uno
+const selectedResponsable = ref("");
 
 const asignar = async (id) => {
   try {
@@ -297,6 +325,18 @@ const newSeguimiento = ref({
   responsablesInvolucrados: [],
   nombreAdjunto: null, 
 });
+
+// **NUEVO** Lógica para añadir responsable uno por uno
+const addResponsable = () => {
+    if (selectedResponsable.value && !newSeguimiento.value.responsablesInvolucrados.includes(selectedResponsable.value)) {
+        newSeguimiento.value.responsablesInvolucrados.push(selectedResponsable.value);
+        selectedResponsable.value = ""; 
+    }
+};
+
+const removeResponsable = (responsable) => {
+    newSeguimiento.value.responsablesInvolucrados = newSeguimiento.value.responsablesInvolucrados.filter(r => r !== responsable);
+};
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
@@ -347,12 +387,12 @@ const agregarSeguimientoSimulado = () => {
     involucrados: newSeguimiento.value.responsablesInvolucrados.slice(), 
     adjuntoNombre: newSeguimiento.value.nombreAdjunto,
   };
-  seguimientoSimulado.value.push(nuevoRegistro);
+  seguimientoSimulado.value.unshift(nuevoRegistro); 
   
   if (newSeguimiento.value.nuevoEstado !== props.incidencia.estado.tipo) {
     const estadoAnterior = props.incidencia.estado.tipo;
     props.incidencia.estado.tipo = newSeguimiento.value.nuevoEstado;
-    seguimientoSimulado.value.push({
+    seguimientoSimulado.value.unshift({
       fecha: fechaFormateada,
       usuario: "Sistema/Usuario Actual",
       tipo: "Estado", 
@@ -367,6 +407,7 @@ const agregarSeguimientoSimulado = () => {
   newSeguimiento.value.nuevoEstado = props.incidencia.estado.tipo;
   newSeguimiento.value.responsablesInvolucrados = [];
   newSeguimiento.value.nombreAdjunto = null; 
+  selectedResponsable.value = "";
   const fileInput = document.getElementById('adjuntoSeguimiento');
   if (fileInput) {
     fileInput.value = '';
@@ -387,9 +428,14 @@ const formatFecha = (dateTimeStr) => {
 
 const formatFechaInput = (dateTimeInput) => {
   if (!dateTimeInput) return "N/A";
-  const [datePart, timePart] = dateTimeInput.split("T");
-  const [year, month, day] = datePart.split("-");
-  return `${day}/${month}/${year}, ${timePart}`;
+  const date = new Date(dateTimeInput);
+  return date.toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).replace(',', '');
 };
 
 const estadoClass = (estadoTipo) => {
