@@ -349,24 +349,19 @@ const estadosDisponibles = ref([
   "Cerrada",
 ]);
 
-// Propiedad de la incidencia para simular el SLA (si no viene del prop)
 if (!props.incidencia.fechaSLA) {
     props.incidencia.fechaSLA = ref(null);
 }
-
-// --- NUEVOS CAMPOS AÑADIDOS AL REGISTRO DE SEGUIMIENTO ---
 const newSeguimiento = ref({
   descripcion: "",
   fecha: new Date().toISOString().substring(0, 16),
   nuevoEstado: props.incidencia.estado.tipo,
   responsablesInvolucrados: [],
   nombreAdjunto: null, 
-  tiempoInvertido: "",          // <--- NUEVO: Tiempo de esfuerzo
-  fechaCompromiso: "",          // <--- NUEVO: Nuevo SLA
-  tipo: "Nota",                 // <--- NUEVO: Tipo de seguimiento
+  tiempoInvertido: "",          
+  fechaCompromiso: "",         
+  tipo: "Nota",               
 });
-
-// --- Lógica de Manejo de Responsables (Tags) ---
 
 const addResponsable = () => {
     if (selectedResponsable.value && !newSeguimiento.value.responsablesInvolucrados.includes(selectedResponsable.value)) {
@@ -378,37 +373,33 @@ const removeResponsable = (responsable) => {
     newSeguimiento.value.responsablesInvolucrados = newSeguimiento.value.responsablesInvolucrados.filter(r => r !== responsable);
 };
 
-// --- Lógica de Manejo de Archivos ---
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
   newSeguimiento.value.nombreAdjunto = file ? file.name : null;
 };
 
-// --- Función para Notificar Usuario (Nueva) ---
 
 const notificarUsuario = () => {
     if (!newSeguimiento.value.descripcion) {
         alert("❌ Debes escribir una nota de seguimiento para notificar al usuario.");
         return;
     }
-    // NOTA: En un entorno real, aquí se llamaría a una API para enviar un email o notificación
     alert(`📧 Notificación enviada al usuario (${props.incidencia.usuario.nombre}) con la nota de seguimiento actual.`);
 };
 
-// --- Data Simulada para el Historial ---
 
 const seguimientoSimulado = ref([
   {
     fecha: "13/10/2025, 09:15",
     usuario: "Administrador",
-    tipo: "Escalamiento", // Nuevo Tipo de Seguimiento
+    tipo: "Escalamiento", 
     titulo: "Análisis Inicial y Escalamiento a Nivel 2",
     descripcion:
       "Se identificó un problema de configuración compleja que requiere intervención del equipo de Back-end. Se adjunta el archivo de log para revisión.",
     involucrados: ["Administrador", "Kevin Agrada"],
     adjuntoNombre: "log_error_131025.txt",
-    tiempo: "1h 0m", // Tiempo invertido
+    tiempo: "1h 0m", 
   },
   {
     fecha: "12/10/2025, 14:30",
