@@ -134,33 +134,47 @@
                       </td>
                     </tr>
 
-                    <tr v-if="activeSeguimientoIndex === index" class="tracking-detail-row">
+                    <tr v-if="activeSeguimientoIndex === index" class="tracking-detail-row-card">
                       <td colspan="8">
-                        <div class="detail-box-expanded">
-                          <h4>Detalle del Seguimiento</h4>
-                          
-                          <div class="detail-meta">
-                              <p>
-                                  <strong>Responsables:</strong> 
-                                  <span v-if="item.involucrados && item.involucrados.length">
-                                      {{ item.involucrados.join(", ") }}
-                                  </span>
-                                  <span v-else>Ninguno.</span>
-                              </p>
-                              <p v-if="item.adjuntoNombre">
-                                  <strong>Adjunto:</strong> 
-                                  <a href="#" @click.prevent="alert('Descargando ' + item.adjuntoNombre)">
-                                      📎 {{ item.adjuntoNombre }} (Descargar)
-                                  </a>
-                              </p>
-                              <p v-if="item.fechaCompromiso">
-                                  <strong>Nuevo SLA Establecido:</strong> 
-                                  <span>{{ formatFecha(item.fechaCompromiso) }}</span>
-                              </p>
-                          </div>
-                          
-                          <p><strong>Descripción Completa:</strong></p>
-                          <p class="description-full">{{ item.descripcion }}</p>
+                        <div class="detail-card-box"> <h4>Detalle del Registro #{{ index + 1 }}</h4>
+                            
+                            <div class="card-meta-group">
+                                <div class="meta-column">
+                                    <p>
+                                        <strong>Fecha y Hora:</strong>
+                                        <span class="highlight-date">{{ item.fecha }}</span>
+                                    </p>
+                                    <p v-if="item.fechaCompromiso">
+                                        <strong>Nuevo SLA:</strong> 
+                                        <span class="highlight-sla">{{ formatFecha(item.fechaCompromiso) }}</span>
+                                    </p>
+                                    <p>
+                                        <strong>Tiempo Invertido:</strong> 
+                                        <span>{{ item.tiempo || 'N/A' }}</span>
+                                    </p>
+                                </div>
+                                
+                                <div class="meta-column">
+                                    <p>
+                                        <strong>Involucrados:</strong> 
+                                        <span v-if="item.involucrados && item.involucrados.length">
+                                            {{ item.involucrados.join(", ") }}
+                                        </span>
+                                        <span v-else>Ninguno.</span>
+                                    </p>
+                                    <p v-if="item.adjuntoNombre">
+                                        <strong>Archivo Adjunto:</strong> 
+                                        <a href="#" @click.prevent="alert('Descargando ' + item.adjuntoNombre)" class="adjunto-link">
+                                            📎 {{ item.adjuntoNombre }} (Descargar)
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <p class="description-heading"><strong>Descripción Completa:</strong></p>
+                            <div class="description-content">
+                                <pre>{{ item.descripcion }}</pre>
+                            </div>
                         </div>
                       </td>
                     </tr>
@@ -174,7 +188,7 @@
               </table>
             </div>
           </section>
-          </div>
+        </div>
 
         <div v-show="activeTab === 'seguimiento'" class="tab-content">
           <section class="new-tracking-form">
@@ -1130,7 +1144,6 @@ const mostrarMensajeExito = (mensaje) => {
   line-height: 1.5;
 }
 
-/* Animaciones */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -1151,62 +1164,117 @@ const mostrarMensajeExito = (mensaje) => {
   }
 }
 
-/* Estilos para el historial de seguimiento expandible */
-.tracking-table tr {
-    transition: background-color 0.2s ease;
+
+.tracking-table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-/* Indicador de que la fila es clickeable */
-.tracking-table tr:hover {
-    background-color: #f5f5f5; /* Color claro al pasar el ratón */
+.tracking-table th {
+    background-color: #eef2f7; 
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 0.9em;
+    border-bottom: 2px solid #ddd;
+    font-weight: 700;
+    color: #444;
 }
 
-/* Estilo para la fila que está expandida */
+.tracking-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.85em;
+    vertical-align: top;
+}
+.tipo-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.75em;
+    display: inline-block;
+}
+.badge-nota { background-color: #e0f7fa; color: #0097a7; }
+.badge-escalamiento { background-color: #ffe0b2; color: #ff8f00; }
+.badge-solución-aplicada { background-color: #c8e6c9; color: #388e3c; }
+.badge-requerimiento-info { background-color: #ffccbc; color: #d84315; }
+
 .tracking-table tr.is-expanded {
-    background-color: #e9eff5; /* Color diferente cuando está activa */
-    font-weight: 600; /* Hace que el texto se vea un poco más fuerte */
-    border-bottom: 2px solid #5c67f2;
+    background-color: #e9eff5; 
+    border-bottom: none; 
+    font-weight: 600; 
 }
 
-/* Fila de Detalle (el contenido expandido) */
-.tracking-detail-row td {
-    padding: 0 !important; /* Elimina padding de la celda que contiene todo */
-    background-color: #f7f7f7; /* Fondo del detalle */
-    border-top: none;
-    border-bottom: 1px solid #ddd;
+.tracking-detail-row-card {
+    background-color: #f7f7f7; 
 }
 
-.detail-box-expanded {
-    padding: 15px 20px;
+.tracking-detail-row-card td {
+    padding: 10px 12px 20px 12px !important; 
+    border-bottom: 2px solid #3b82f6; 
+}
+.detail-card-box {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+    padding: 20px;
+    margin-top: 5px; 
 }
 
-.detail-box-expanded h4 {
+.detail-card-box h4 {
     margin-top: 0;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
+    margin-bottom: 15px;
+    color: #3b82f6; 
     font-size: 1.1em;
-    color: #5c67f2;
+    padding-bottom: 5px;
+    border-bottom: 2px dashed #f0f0f0;
 }
 
-.detail-meta p {
-    margin-bottom: 5px;
+.card-meta-group {
+    display: flex;
+    gap: 50px; 
+    margin-bottom: 15px;
+}
+
+.meta-column {
+    flex: 1;
+    min-width: 40%;
+}
+
+.meta-column p {
+    margin: 0;
+    padding: 3px 0;
     font-size: 0.9em;
 }
-
-.description-full {
-    white-space: pre-wrap; /* Mantiene saltos de línea y formato */
-    margin-top: 10px;
+.highlight-date {
+    font-weight: 700;
+    color: #333;
+}
+.highlight-sla {
+    font-weight: 700;
+    color: #c0392b; 
+}
+.description-heading {
+    margin: 15px 0 5px 0;
+    font-size: 0.95em;
+    color: #333;
+}
+.description-content pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: inherit; 
+    font-size: 0.9em;
     padding: 10px;
-    background-color: #fff;
-    border: 1px solid #eee;
+    background-color: #f9f9f9; 
+    border: 1px dashed #e0e0e0;
     border-radius: 4px;
+    color: #444;
 }
-
-/* Ocultar la descripción previa en la fila expandida */
-.tracking-table tr.is-expanded .description-preview {
-    opacity: 0.5;
+.adjunto-link {
+    font-weight: 600;
+    color: #2980b9;
+    text-decoration: none;
 }
-
 
 
 </style>
