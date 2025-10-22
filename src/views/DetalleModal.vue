@@ -22,7 +22,9 @@
       </div>
 
       <div class="modal-body">
+        
         <div v-show="activeTab === 'vista'" class="tab-content">
+          
           <section class="info-section">
             <h3>Información Principal</h3>
             <div class="data-group">
@@ -85,7 +87,94 @@
               </p>
             </div>
           </section>
-        </div>
+
+          <hr style="margin-top: 32px;" />
+          <section class="tracking-log">
+            <h3>Historial de Seguimiento (Clic para Expandir Detalle)</h3>
+            <div class="tracking-table-container">
+              <table class="tracking-table">
+                <thead>
+                  <tr>
+                    <th style="width: 100px;">Fecha</th>
+                    <th style="width: 80px;">Tipo</th>
+                    <th style="width: 150px;">Título/Estado</th>
+                    <th style="width: 100px;">Usuario</th>
+                    <th style="width: 80px;">Tiempo</th> 
+                    <th style="width: 180px;">Involucrados</th>
+                    <th style="width: 150px;">Adjuntos</th>
+                    <th>Descripción (Previa)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template
+                    v-for="(item, index) in seguimientoSimulado"
+                    :key="index"
+                  >
+                    <tr
+                      :class="[
+                        `row-${item.tipo.toLowerCase().replace(' ', '-')}`,
+                        { 'is-expanded': activeSeguimientoIndex === index } // Clase para indicar expansión
+                      ]"
+                      @click="toggleSeguimiento(index)"
+                      style="cursor: pointer;"
+                    >
+                      <td>{{ item.fecha }}</td>
+                      <td>
+                        <span :class="['tipo-badge', `badge-${item.tipo.toLowerCase().replace(' ', '-')}`]">
+                          {{ item.tipo }}
+                        </span>
+                      </td>
+                      <td><strong>{{ item.titulo }}</strong></td>
+                      <td>{{ item.usuario }}</td>
+                      <td>{{ item.tiempo || 'N/A' }}</td>
+                      <td>{{ item.involucrados && item.involucrados.length ? item.involucrados.length + ' involucrados' : 'N/A' }}</td> 
+                      <td>{{ item.adjuntoNombre ? '📎 Adjunto' : 'N/A' }}</td>
+                      <td class="description-preview">
+                        {{ item.descripcion.substring(0, 50) + (item.descripcion.length > 50 ? '...' : '') }}
+                      </td>
+                    </tr>
+
+                    <tr v-if="activeSeguimientoIndex === index" class="tracking-detail-row">
+                      <td colspan="8">
+                        <div class="detail-box-expanded">
+                          <h4>Detalle del Seguimiento</h4>
+                          
+                          <div class="detail-meta">
+                              <p>
+                                  <strong>Responsables:</strong> 
+                                  <span v-if="item.involucrados && item.involucrados.length">
+                                      {{ item.involucrados.join(", ") }}
+                                  </span>
+                                  <span v-else>Ninguno.</span>
+                              </p>
+                              <p v-if="item.adjuntoNombre">
+                                  <strong>Adjunto:</strong> 
+                                  <a href="#" @click.prevent="alert('Descargando ' + item.adjuntoNombre)">
+                                      📎 {{ item.adjuntoNombre }} (Descargar)
+                                  </a>
+                              </p>
+                              <p v-if="item.fechaCompromiso">
+                                  <strong>Nuevo SLA Establecido:</strong> 
+                                  <span>{{ formatFecha(item.fechaCompromiso) }}</span>
+                              </p>
+                          </div>
+                          
+                          <p><strong>Descripción Completa:</strong></p>
+                          <p class="description-full">{{ item.descripcion }}</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+                  
+                  <tr v-if="seguimientoSimulado.length === 0">
+                    <td colspan="8" class="no-tracking-message"> Aún no hay registros de seguimiento para esta incidencia.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          </div>
 
         <div v-show="activeTab === 'seguimiento'" class="tab-content">
           <section class="new-tracking-form">
@@ -225,60 +314,6 @@
               Registrar Seguimiento
             </button>
           </section>
-          
-          <hr style="margin-top: 32px;" />
-
-          <section class="tracking-log">
-            <h3>Historial de Seguimiento</h3>
-            <div class="tracking-table-container">
-              <table class="tracking-table">
-                <thead>
-                  <tr>
-                    <th style="width: 100px;">Fecha</th>
-                    <th style="width: 80px;">Tipo</th>
-                    <th style="width: 150px;">Título/Estado</th>
-                    <th style="width: 100px;">Usuario</th>
-                    <th style="width: 80px;">Tiempo</th> <th style="width: 180px;">Involucrados</th>
-                    <th style="width: 150px;">Adjuntos</th>
-                    <th>Descripción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(item, index) in seguimientoSimulado"
-                    :key="index"
-                    :class="`row-${item.tipo.toLowerCase().replace(' ', '-')}`"
-                  >
-                    <td>{{ item.fecha }}</td>
-                    <td>
-                      <span :class="['tipo-badge', `badge-${item.tipo.toLowerCase().replace(' ', '-')}`]">
-                        {{ item.tipo }}
-                      </span>
-                    </td>
-                    <td><strong>{{ item.titulo }}</strong></td>
-                    <td>{{ item.usuario }}</td>
-                    <td>{{ item.tiempo || 'N/A' }}</td> <td>
-                      <span v-if="item.involucrados && item.involucrados.length">
-                        {{ item.involucrados.join(", ") }}
-                      </span>
-                      <span v-else>N/A</span>
-                    </td>
-                    <td>
-                      <span v-if="item.adjuntoNombre" class="adjunto-tag">
-                        📎 {{ item.adjuntoNombre }}
-                      </span>
-                      <span v-else>N/A</span>
-                    </td>
-                    <td>{{ item.descripcion }}</td>
-                  </tr>
-                  <tr v-if="seguimientoSimulado.length === 0">
-                    <td colspan="8" class="no-tracking-message"> Aún no hay registros de seguimiento para esta incidencia.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
         </div>
       </div>
 
@@ -313,6 +348,16 @@
 import { defineProps, defineEmits, ref } from "vue";
 import axios from "axios";
 import AsignarModal from "/src/views/AsignarModal.vue"; 
+
+const activeSeguimientoIndex = ref(null);
+const toggleSeguimiento = (index) => {
+  // Si se hace clic en la fila ya abierta, la cerramos (null).
+  // Si se hace clic en una fila nueva, la abrimos (index).
+  activeSeguimientoIndex.value = activeSeguimientoIndex.value === index ? null : index;
+};
+
+
+
 
 const props = defineProps({
   incidencia: {
@@ -1105,4 +1150,63 @@ const mostrarMensajeExito = (mensaje) => {
     opacity: 1;
   }
 }
+
+/* Estilos para el historial de seguimiento expandible */
+.tracking-table tr {
+    transition: background-color 0.2s ease;
+}
+
+/* Indicador de que la fila es clickeable */
+.tracking-table tr:hover {
+    background-color: #f5f5f5; /* Color claro al pasar el ratón */
+}
+
+/* Estilo para la fila que está expandida */
+.tracking-table tr.is-expanded {
+    background-color: #e9eff5; /* Color diferente cuando está activa */
+    font-weight: 600; /* Hace que el texto se vea un poco más fuerte */
+    border-bottom: 2px solid #5c67f2;
+}
+
+/* Fila de Detalle (el contenido expandido) */
+.tracking-detail-row td {
+    padding: 0 !important; /* Elimina padding de la celda que contiene todo */
+    background-color: #f7f7f7; /* Fondo del detalle */
+    border-top: none;
+    border-bottom: 1px solid #ddd;
+}
+
+.detail-box-expanded {
+    padding: 15px 20px;
+}
+
+.detail-box-expanded h4 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+    font-size: 1.1em;
+    color: #5c67f2;
+}
+
+.detail-meta p {
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.description-full {
+    white-space: pre-wrap; /* Mantiene saltos de línea y formato */
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+/* Ocultar la descripción previa en la fila expandida */
+.tracking-table tr.is-expanded .description-preview {
+    opacity: 0.5;
+}
+
+
+
 </style>
