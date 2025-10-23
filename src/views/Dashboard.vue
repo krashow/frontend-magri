@@ -1,6 +1,5 @@
 <template>
   <div class="dashboard">
-    <!-- Barra lateral -->
     <aside class="sidebar">
       <div class="sidebar-logo">
         <img src="/logo.png" alt="Logo" />
@@ -60,10 +59,8 @@
       </div>
     </aside>
 
-    <!-- Contenido principal -->
     <main class="main-content">
       <header class="header">
-        <!-- Usuario arriba a la derecha -->
         <div class="user-info">
           <i class="fas fa-user-circle"></i>
           <span>{{ userName }}</span>
