@@ -113,7 +113,7 @@
                     <tr
                       :class="[
                         `row-${item.tipo.toLowerCase().replace(' ', '-')}`,
-                        { 'is-expanded': activeSeguimientoIndex === index } // Clase para indicar expansión
+                        { 'is-expanded': activeSeguimientoIndex === index }
                       ]"
                       @click="toggleSeguimiento(index)"
                       style="cursor: pointer;"
@@ -365,8 +365,6 @@ import AsignarModal from "/src/views/AsignarModal.vue";
 
 const activeSeguimientoIndex = ref(null);
 const toggleSeguimiento = (index) => {
-  // Si se hace clic en la fila ya abierta, la cerramos (null).
-  // Si se hace clic en una fila nueva, la abrimos (index).
   activeSeguimientoIndex.value = activeSeguimientoIndex.value === index ? null : index;
 };
 

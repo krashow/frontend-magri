@@ -111,7 +111,6 @@
               v-model="respuestas[pregunta.id]"
               type="date"
             />
-            
             <div v-else-if="pregunta.tipoCampo === 'checkbox'" class="checkbox-group">
                 <input
                     type="checkbox"
