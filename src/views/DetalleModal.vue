@@ -1274,5 +1274,55 @@ const mostrarMensajeExito = (mensaje) => {
     text-decoration: none;
 }
 
-
+.btn-action.resolve {
+    background-color: #10b981;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.btn-action.resolve:hover {
+    background-color: #059669;
+}
+.btn-action.assign {
+    background-color: #3b82f6;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.btn-action.assign:hover {
+    background-color: #2563eb;
+}
+.btn-primary.edit {
+    background: #2952b9;
+    color: white; 
+}
+.btn-secondary.notify {
+    background-color: #f59e0b;
+    color: #1e293b; 
+    padding: 10px 20px;
+    border: 1px solid #d97706;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+.btn-secondary.notify:hover {
+    background-color: #d97706; 
+    color: white; 
+}
+.btn-secondary.notify:disabled,
+.btn-primary.edit:disabled {
+    background-color: #cbd5e1 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed !important;
+    border-color: #e2e8f0 !important;
+}
 </style>
