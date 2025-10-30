@@ -1305,17 +1305,17 @@ const mostrarMensajeExito = (mensaje) => {
     color: white; 
 }
 .btn-secondary.notify {
-    background-color: #f59e0b;
+    background-color: #1495b6;
     color: #1e293b; 
     padding: 10px 20px;
-    border: 1px solid #d97706;
+    border: 1px solid #0a5264;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
     transition: background-color 0.2s;
 }
 .btn-secondary.notify:hover {
-    background-color: #d97706; 
+    background-color: #0a5264; 
     color: white; 
 }
 .btn-secondary.notify:disabled,
