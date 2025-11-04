@@ -105,10 +105,9 @@
                     <th>Descripción (Previa)</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <template
-                    v-for="(item, index) in seguimientoSimulado"
-                    :key="index"
+                <tbody id="tabla-historial-body"> <template
+                    v-for="(item, index) in historialGestion"
+                    :key="item.idGestion" 
                   >
                     <tr
                       :class="[
@@ -124,11 +123,11 @@
                           {{ item.tipo }}
                         </span>
                       </td>
-                      <td><strong>{{ item.titulo }}</strong></td>
+                      <td><strong>{{ item.titulo || item.nuevoEstado }}</strong></td>
                       <td>{{ item.usuario }}</td>
-                      <td>{{ item.tiempo || 'N/A' }}</td>
+                      <td>{{ item.tiempoInvertido || 'N/A' }}</td>
                       <td>{{ item.involucrados && item.involucrados.length ? item.involucrados.length + ' involucrados' : 'N/A' }}</td> 
-                      <td>{{ item.adjuntoNombre ? '📎 Adjunto' : 'N/A' }}</td>
+                      <td>{{ item.adjuntoRuta ? ' Adjunto' : 'N/A' }}</td>
                       <td class="description-preview">
                         {{ item.descripcion.substring(0, 50) + (item.descripcion.length > 50 ? '...' : '') }}
                       </td>
@@ -150,7 +149,7 @@
                                     </p>
                                     <p>
                                         <strong>Tiempo Invertido:</strong> 
-                                        <span>{{ item.tiempo || 'N/A' }}</span>
+                                        <span>{{ item.tiempoInvertido || 'N/A' }}</span>
                                     </p>
                                 </div>
                                 
@@ -162,10 +161,10 @@
                                         </span>
                                         <span v-else>Ninguno.</span>
                                     </p>
-                                    <p v-if="item.adjuntoNombre">
+                                    <p v-if="item.adjuntoRuta">
                                         <strong>Archivo Adjunto:</strong> 
-                                        <a href="#" @click.prevent="alert('Descargando ' + item.adjuntoNombre)" class="adjunto-link">
-                                            📎 {{ item.adjuntoNombre }} (Descargar)
+                                        <a href="#" @click.prevent="alert('Descargando ' + item.adjuntoRuta)" class="adjunto-link">
+                                            📎 {{ item.adjuntoRuta }} (Descargar)
                                         </a>
                                     </p>
                                 </div>
@@ -180,7 +179,7 @@
                     </tr>
                   </template>
                   
-                  <tr v-if="seguimientoSimulado.length === 0">
+                  <tr v-if="!historialGestion || historialGestion.length === 0">
                     <td colspan="8" class="no-tracking-message"> Aún no hay registros de seguimiento para esta incidencia.
                     </td>
                   </tr>
@@ -193,6 +192,8 @@
         <div v-show="activeTab === 'seguimiento'" class="tab-content">
           <section class="new-tracking-form">
             <h4>Añadir Seguimiento y/o Cambiar Estado</h4>
+            
+            <div id="gestion-mensaje-estado" style="color: blue; margin-bottom: 10px;"></div>
 
             <div class="form-row">
               <div class="form-group">
@@ -322,7 +323,7 @@
             </button>
             
             <button
-              @click="agregarSeguimientoSimulado"
+              @click="registrarGestionCompleto"
               class="btn-primary edit"
             >
               Registrar Seguimiento
@@ -357,29 +358,47 @@
     @mensajeGlobal="mostrarMensajeExito"
   />
 </template>
-
 <script setup>
-import { defineProps, defineEmits, ref } from "vue";
+import { defineProps, defineEmits, ref, onMounted, watch } from "vue";
 import axios from "axios";
 import AsignarModal from "/src/views/AsignarModal.vue"; 
 
+// --- CONFIGURACIÓN DE API Y USUARIOS ---
+const BASE_URL = "http://localhost:8081/api/gestion";
+const ID_USUARIO_ACTUAL = 1; // ⚠️ IMPORTANTE: REEMPLAZA ESTE '1' CON EL ID DEL USUARIO LOGUEADO REAL
+
+// Mapeo estático de usuarios: Necesario para enviar IDs en el POST y mostrar Nombres en el GET
+const mapaUsuarios = [
+    { id: 1, nombre: "Administrador" },
+    { id: 2, nombre: "Kevin Agrada" },
+    { id: 3, nombre: "Juan Perez" },
+    { id: 4, nombre: "user1" },
+    { id: 5, nombre: "user2" },
+    { id: 6, nombre: "Técnico Soporte" },
+];
+
+const usuariosDisponibles = ref(mapaUsuarios.map(u => u.nombre)); // Array de nombres para el <select>
+// ------------------------------------
+
+// --- VARIABLES DE ESTADO ---
 const activeSeguimientoIndex = ref(null);
+const historialGestion = ref([]); // ESTA VARIABLE REEMPLAZA a seguimientoSimulado
+const isProcessing = ref(false); // Para deshabilitar el botón de registro
+// ------------------------------------
+
 const toggleSeguimiento = (index) => {
-  activeSeguimientoIndex.value = activeSeguimientoIndex.value === index ? null : index;
+  activeSeguimientoIndex.value = activeSeguimientoIndex.value === index ? null : index;
 };
 
-
-
-
 const props = defineProps({
-  incidencia: {
-    type: Object,
-    required: true,
-  },
-  fechaSLA: { 
-      type: String, 
-      default: null 
-  } 
+  incidencia: {
+    type: Object,
+    required: true,
+  },
+  fechaSLA: { 
+      type: String, 
+      default: null 
+  } 
 });
 
 const $emit = defineEmits(["cerrar", "editar"]); 
@@ -389,242 +408,312 @@ const mostrarAsignarModal = ref(false);
 const incidenciaAsignacion = ref(null);
 const selectedResponsable = ref("");
 
-const usuariosDisponibles = ref([
-  "Administrador",
-  "Kevin Agrada",
-  "Juan Perez",
-  "user1",
-  "user2",
-  "Técnico Soporte",
-]);
-
 const estadosDisponibles = ref([
-  "Abierta",
-  "En Proceso",
-  "Pendiente de Usuario",
-  "Resuelta (Verificación)",
-  "Cerrada",
+  "Abierta",
+  "En Proceso",
+  "Pendiente de Usuario",
+  "Resuelta (Verificación)",
+  "Cerrada",
 ]);
 
 if (!props.incidencia.fechaSLA) {
-    props.incidencia.fechaSLA = ref(null);
+    props.incidencia.fechaSLA = ref(null);
 }
 const newSeguimiento = ref({
-  descripcion: "",
-  fecha: new Date().toISOString().substring(0, 16),
-  nuevoEstado: props.incidencia.estado.tipo,
-  responsablesInvolucrados: [],
-  nombreAdjunto: null, 
-  tiempoInvertido: "",          
-  fechaCompromiso: "",         
-  tipo: "Nota",               
+  descripcion: "",
+  fecha: new Date().toISOString().substring(0, 16),
+  nuevoEstado: props.incidencia.estado.tipo,
+  responsablesInvolucrados: [],
+  nombreAdjunto: null, 
+  tiempoInvertido: "",          
+  fechaCompromiso: "",         
+  tipo: "Nota",               
 });
 
-const addResponsable = () => {
-    if (selectedResponsable.value && !newSeguimiento.value.responsablesInvolucrados.includes(selectedResponsable.value)) {
-        newSeguimiento.value.responsablesInvolucrados.push(selectedResponsable.value);
-        selectedResponsable.value = ""; 
+const getMensajeEstadoDiv = () => {
+    return document.getElementById('gestion-mensaje-estado');
+};
+
+// ====================================================================================
+// === FUNCIONES DE GESTIÓN (POST y GET REALES) =======================================
+// ====================================================================================
+
+// Función auxiliar para manejar el POST
+const ejecutarPost = async (data) => {
+    isProcessing.value = true;
+    const estadoDiv = getMensajeEstadoDiv();
+    if (estadoDiv) estadoDiv.textContent = "📝 Enviando registro de gestión...";
+    
+    try {
+        await axios.post(`${BASE_URL}/registrar`, data);
+
+        if (estadoDiv) estadoDiv.textContent = "✅ Gestión registrada con éxito. Actualizando historial...";
+        return true; 
+
+    } catch (error) {
+        console.error("Error en el registro de gestión:", error);
+        const errorMessage = error.response?.data?.mensaje || `Error ${error.response?.status || 500} al registrar.`;
+        if (estadoDiv) estadoDiv.textContent = `❌ Error al registrar: ${errorMessage}`;
+        return false;
+
+    } finally {
+        isProcessing.value = false;
     }
 };
-const removeResponsable = (responsable) => {
-    newSeguimiento.value.responsablesInvolucrados = newSeguimiento.value.responsablesInvolucrados.filter(r => r !== responsable);
+
+
+// Función para obtener y mostrar el historial (GET)
+const cargarHistorial = async () => {
+    const url = `${BASE_URL}/historial/${props.incidencia.id}`;
+    const estadoDiv = getMensajeEstadoDiv();
+    if (estadoDiv) estadoDiv.textContent = "🔍 Cargando historial...";
+    
+    // Función auxiliar para convertir IDs (del API) a Nombres (para la tabla)
+    const getNamesFromIds = (idString) => {
+        if (!idString) return [];
+        // Divide el string "1,2,5" en un array de números
+        const ids = idString.toString().split(',').map(s => parseInt(s.trim()));
+        // Mapea cada ID al nombre correspondiente
+        return ids.map(id => {
+            const user = mapaUsuarios.find(u => u.id === id);
+            return user ? user.nombre : `ID ${id}`;
+        });
+    };
+    
+    try {
+        const respuesta = await axios.get(url);
+        
+        // Mapeo y ajuste de datos del backend a la tabla de Vue
+        historialGestion.value = respuesta.data.map(item => ({
+            idGestion: item.id, // Tu API usa 'id' como ID de gestión (bigserial)
+            fecha: formatFechaInput(item.fecha_registro), // Tu API usa 'fecha_registro'
+            usuario: item.nombreUsuario || 'S/I', // Suponemos que tu backend debe incluir el nombre del usuario
+            tipo: item.tipo,
+            descripcion: item.descripcion,
+            nuevoEstado: item.nuevo_estado, // Tu API usa 'nuevo_estado'
+            tiempoInvertido: item.tiempo_invertido, // Tu API usa 'tiempo_invertido'
+            adjuntoRuta: item.adjunto_ruta, // Tu API usa 'adjunto_ruta'
+            fechaCompromiso: item.fecha_compromiso, // Tu API usa 'fecha_compromiso'
+            // CONVERTIMOS LA CADENA DE IDs A NOMBRES PARA MOSTRAR:
+            involucrados: getNamesFromIds(item.involucrados), 
+            titulo: item.nuevo_estado ? `Cambio a ${item.nuevo_estado}` : item.tipo,
+        }));
+        
+        if (estadoDiv) estadoDiv.textContent = `✅ Historial actualizado: ${historialGestion.value.length} entradas.`;
+
+    } catch (error) {
+        console.error("Error al obtener el historial:", error);
+        if (estadoDiv) estadoDiv.textContent = "❌ Error al cargar el historial. Revise la consola.";
+        historialGestion.value = [];
+    }
 };
 
-
-const handleFileUpload = (event) => {
-  const file = event.target.files[0];
-  newSeguimiento.value.nombreAdjunto = file ? file.name : null;
-};
-
-
-const notificarUsuario = () => {
+// Función principal que se llama desde el botón (POST -> GET)
+const registrarGestionCompleto = async () => {
     if (!newSeguimiento.value.descripcion) {
-        alert("❌ Debes escribir una nota de seguimiento para notificar al usuario.");
+        alert("La nota de seguimiento es obligatoria para registrar una actividad.");
         return;
     }
-    alert(`📧 Notificación enviada al usuario (${props.incidencia.usuario.nombre}) con la nota de seguimiento actual.`);
+    
+    // --- LÓGICA CLAVE: CONVERTIR NOMBRES SELECCIONADOS A IDs (string "1,2,3") ---
+    const involucradosIDs = newSeguimiento.value.responsablesInvolucrados
+        .map(nombre => {
+            const user = mapaUsuarios.find(u => u.nombre === nombre);
+            return user ? user.id : null; 
+        })
+        .filter(id => id !== null) 
+        .join(','); 
+    // -----------------------------------------------------------------------------
+
+    // 1. Mapeo de datos para el POST (API)
+    // Coincide con la estructura de tu base de datos: id_inc, id_user, nuevo_estado, tiempo_invertido, fecha_compromiso
+    const datosParaAPI = {
+        "idIncidencia": props.incidencia.id,
+        "idUsuario": ID_USUARIO_ACTUAL, 
+        "tipo": newSeguimiento.value.tipo, 
+        "descripcion": newSeguimiento.value.descripcion, 
+        "nuevoEstado": newSeguimiento.value.nuevoEstado, 
+        "tiempoInvertido": newSeguimiento.value.tiempoInvertido || "0h 0m",
+        "adjuntoRuta": newSeguimiento.value.nombreAdjunto, 
+        "fechaCompromiso": newSeguimiento.value.fechaCompromiso || null,
+        "involucrados": involucradosIDs || null, // Se envía la cadena de IDs
+    };
+
+    // 2. Ejecutar POST
+    const postExitoso = await ejecutarPost(datosParaAPI);
+
+    if (postExitoso) {
+        // 3. Recargar el historial para actualizar la tabla (GET)
+        await cargarHistorial();
+
+        // 4. Actualizar el estado de la incidencia si cambió
+        props.incidencia.estado.tipo = datosParaAPI.nuevoEstado;
+        if (datosParaAPI.fechaCompromiso) {
+            props.incidencia.fechaSLA = datosParaAPI.fechaCompromiso;
+        }
+        
+        // 5. Limpiar el formulario
+        newSeguimiento.value.descripcion = "";
+        newSeguimiento.value.fecha = new Date().toISOString().substring(0, 16);
+        newSeguimiento.value.nuevoEstado = props.incidencia.estado.tipo;
+        newSeguimiento.value.responsablesInvolucrados = [];
+        newSeguimiento.value.nombreAdjunto = null; 
+        newSeguimiento.value.tiempoInvertido = ""; 
+        newSeguimiento.value.fechaCompromiso = ""; 
+        newSeguimiento.value.tipo = "Nota"; 
+        selectedResponsable.value = ""; 
+        const fileInput = document.getElementById('adjuntoSeguimiento');
+        if (fileInput) fileInput.value = '';
+    }
 };
 
-
-const seguimientoSimulado = ref([
-  {
-    fecha: "13/10/2025, 09:15",
-    usuario: "Administrador",
-    tipo: "Escalamiento", 
-    titulo: "Análisis Inicial y Escalamiento a Nivel 2",
-    descripcion:
-      "Se identificó un problema de configuración compleja que requiere intervención del equipo de Back-end. Se adjunta el archivo de log para revisión.",
-    involucrados: ["Administrador", "Kevin Agrada"],
-    adjuntoNombre: "log_error_131025.txt",
-    tiempo: "1h 0m", 
-  },
-  {
-    fecha: "12/10/2025, 14:30",
-    usuario: "Sistema/Usuario",
-    tipo: "Registro",
-    titulo: "Incidencia Creada (Estado: Abierta)",
-    descripcion:
-      "Incidencia creada automáticamente por el sistema al enviar el formulario.",
-    involucrados: ["Usuario Creador"],
-    adjuntoNombre: null,
-    tiempo: null,
-  },
-]);
-
-const agregarSeguimientoSimulado = () => {
-  if (!newSeguimiento.value.descripcion) {
-    alert("La nota de seguimiento es obligatoria para registrar una actividad.");
-    return;
-  }
-
-  const fechaFormateada = formatFechaInput(newSeguimiento.value.fecha);
-  const estadoAnterior = props.incidencia.estado.tipo;
-  
-  const nuevoRegistro = {
-    fecha: fechaFormateada,
-    usuario: "Usuario Actual",
-    tipo: newSeguimiento.value.tipo, 
-    titulo: `Acción registrada (${newSeguimiento.value.tipo})`,
-    descripcion: newSeguimiento.value.descripcion,
-    involucrados: newSeguimiento.value.responsablesInvolucrados.slice(), 
-    adjuntoNombre: newSeguimiento.value.nombreAdjunto,
-    tiempo: newSeguimiento.value.tiempoInvertido || null,
-  };
-  seguimientoSimulado.value.unshift(nuevoRegistro); 
-  
-  if (newSeguimiento.value.nuevoEstado !== estadoAnterior) {
-    props.incidencia.estado.tipo = newSeguimiento.value.nuevoEstado;
-    seguimientoSimulado.value.unshift({ 
-      fecha: fechaFormateada,
-      usuario: "Sistema/Usuario Actual",
-      tipo: "Estado", 
-      titulo: `Cambio de Estado: ${estadoAnterior} → ${props.incidencia.estado.tipo}`,
-      descripcion: `El estado fue actualizado por el usuario.`,
-      involucrados: [],
-      adjuntoNombre: null,
-      tiempo: null,
-    });
-  }
-
-  if (newSeguimiento.value.fechaCompromiso) {
-      props.incidencia.fechaSLA = newSeguimiento.value.fechaCompromiso;
-  }
-  
-  newSeguimiento.value.descripcion = "";
-  newSeguimiento.value.fecha = new Date().toISOString().substring(0, 16);
-  newSeguimiento.value.nuevoEstado = props.incidencia.estado.tipo;
-  newSeguimiento.value.responsablesInvolucrados = [];
-  newSeguimiento.value.nombreAdjunto = null; 
-  newSeguimiento.value.tiempoInvertido = "";    
-  newSeguimiento.value.fechaCompromiso = "";   
-  newSeguimiento.value.tipo = "Nota"; 
-  selectedResponsable.value = ""; 
-  const fileInput = document.getElementById('adjuntoSeguimiento');
-  if (fileInput) {
-    fileInput.value = '';
-  }
-};
-
-const resolverIncidencia = () => {
+// Función modificada para usar la nueva lógica (solo si es necesario)
+const resolverIncidencia = async () => {
     const estadoActual = props.incidencia.estado.tipo;
     if (estadoActual === 'En Proceso' || estadoActual === 'Pendiente de Usuario') {
         const confirmacion = confirm(`¿Estás seguro de que deseas cambiar el estado a "Resuelta (Verificación)"?`);
         if (confirmacion) {
-            const fechaFormateada = formatFechaInput(new Date().toISOString().substring(0, 16));
-            const estadoAnterior = props.incidencia.estado.tipo;
-            
-            props.incidencia.estado.tipo = 'Resuelta (Verificación)';
-            
-            seguimientoSimulado.value.unshift({ 
-                fecha: fechaFormateada,
-                usuario: "Usuario Actual (Acción Rápida)",
-                tipo: "Estado", 
-                titulo: `Resuelta (Verificación) por acción rápida.`,
-                descripcion: `Incidencia marcada como resuelta. Pendiente de la verificación final.`,
-                involucrados: [],
-                adjuntoNombre: null,
-                tiempo: null,
-            });
-            mostrarMensajeExito("Incidencia marcada como Resuelta para verificación. ✨");
+            // Creamos un registro de gestión para el cambio de estado (POST)
+            const datosParaAPI = {
+                "idIncidencia": props.incidencia.id,
+                "idUsuario": ID_USUARIO_ACTUAL,
+                "tipo": "Estado", 
+                "descripcion": `Incidencia marcada como resuelta para verificación. Acción rápida.`,
+                "nuevoEstado": 'Resuelta (Verificación)',
+                "tiempoInvertido": "0h 0m",
+                "adjuntoRuta": null, 
+                "fechaCompromiso": null,
+                "involucrados": null,
+            };
+
+            const postExitoso = await ejecutarPost(datosParaAPI);
+
+            if (postExitoso) {
+                props.incidencia.estado.tipo = 'Resuelta (Verificación)';
+                await cargarHistorial();
+                mostrarMensajeExito("Incidencia marcada como Resuelta para verificación. ✨");
+            }
         }
     } else {
         alert("La incidencia debe estar en estado 'En Proceso' o 'Pendiente de Usuario' para usar esta acción rápida.");
     }
 };
 
+// ====================================================================================
+// === LLAMADAS INICIALES Y AUXILIARES (SE MANTIENEN) =================================
+// ====================================================================================
+
+const addResponsable = () => {
+    if (selectedResponsable.value && !newSeguimiento.value.responsablesInvolucrados.includes(selectedResponsable.value)) {
+        newSeguimiento.value.responsablesInvolucrados.push(selectedResponsable.value);
+        selectedResponsable.value = ""; 
+    }
+};
+const removeResponsable = (responsable) => {
+    newSeguimiento.value.responsablesInvolucrados = newSeguimiento.value.responsablesInvolucrados.filter(r => r !== responsable);
+};
+
+
+const handleFileUpload = (event) => {
+  const file = event.target.files[0];
+  newSeguimiento.value.nombreAdjunto = file ? file.name : null;
+};
+
+
+const notificarUsuario = () => {
+    if (!newSeguimiento.value.descripcion) {
+        alert("❌ Debes escribir una nota de seguimiento para notificar al usuario.");
+        return;
+    }
+    alert(`📧 Notificación enviada al usuario (${props.incidencia.usuario.nombre}) con la nota de seguimiento actual.`);
+};
+
+
 const formatFecha = (dateTimeStr) => {
-  if (!dateTimeStr) return "N/A";
-  const date = new Date(dateTimeStr);
-  return date.toLocaleDateString("es-ES", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  if (!dateTimeStr) return "N/A";
+  const date = new Date(dateTimeStr);
+  return date.toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 const formatFechaInput = (dateTimeInput) => {
-  if (!dateTimeInput) return "N/A";
-  const date = new Date(dateTimeInput);
-  return date.toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).replace(',', '');
+  if (!dateTimeInput) return "N/A";
+  const date = new Date(dateTimeInput);
+  return date.toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).replace(',', '');
 };
 
 const estadoClass = (estadoTipo) => {
-  switch (estadoTipo) {
-    case "Abierta":
-      return "status-open";
-    case "En Proceso":
-    case "Resuelta (Verificación)":
-      return "status-in-progress";
-    case "Pendiente de Usuario":
-      return "status-default";
-    case "Cerrada":
-      return "status-closed";
-    default:
-      return "status-default";
-  }
+  switch (estadoTipo) {
+    case "Abierta":
+      return "status-open";
+    case "En Proceso":
+    case "Resuelta (Verificación)":
+      return "status-in-progress";
+    case "Pendiente de Usuario":
+      return "status-default";
+    case "Cerrada":
+      return "status-closed";
+    default:
+      return "status-default";
+  }
 };
 
 const slaClass = (fechaSLA) => {
-    if (!fechaSLA) return '';
-    const diff = new Date(fechaSLA).getTime() - new Date().getTime();
-    const days = diff / (1000 * 60 * 60 * 24);
+    if (!fechaSLA) return '';
+    const diff = new Date(fechaSLA).getTime() - new Date().getTime();
+    const days = diff / (1000 * 60 * 60 * 24);
 
-    if (days < 0) return 'sla-overdue';
-    if (days < 1) return 'sla-warning';
-    return 'sla-ok'; 
+    if (days < 0) return 'sla-overdue';
+    if (days < 1) return 'sla-warning';
+    return 'sla-ok'; 
 };
 
 const asignar = async (id) => {
-    try {
-        const url = `http://localhost:8081/api/incidencias/detalle?id=${id}`; 
-        const resp = await axios.get(url); 
-        incidenciaAsignacion.value = resp.data;
-        mostrarAsignarModal.value = true;
-    } catch (err) {
-        console.error("Error al cargar detalle para asignar:", err);
-        alert(
-            "❌ No se pudo cargar el detalle de la incidencia para la asignación."
-        );
-    }
+    try {
+        const url = `http://localhost:8081/api/incidencias/detalle?id=${id}`; 
+        const resp = await axios.get(url); 
+        incidenciaAsignacion.value = resp.data;
+        mostrarAsignarModal.value = true;
+    } catch (err) {
+        console.error("Error al cargar detalle para asignar:", err);
+        alert(
+            "❌ No se pudo cargar el detalle de la incidencia para la asignación."
+        );
+    }
 };
 const cerrarAsignarModal = () => {
-  mostrarAsignarModal.value = false;
+  mostrarAsignarModal.value = false;
 };
 const incidenciaAsignadaHandler = (incidenciaActualizada) => {
-  cerrarAsignarModal();
-  $emit("cerrar");
+  cerrarAsignarModal();
+  $emit("cerrar");
 };
 const mostrarMensajeExito = (mensaje) => {
-  alert("✅ " + mensaje);
+  alert("✅ " + mensaje);
 };
+
+// Cargar el historial cuando el componente se monta por primera vez
+onMounted(() => {
+    cargarHistorial();
+});
+
+// Watcher para recargar el historial si se cambia a la pestaña 'seguimiento' (opcional, pero útil)
+watch(activeTab, (newTab) => {
+    if (newTab === 'seguimiento') {
+        cargarHistorial();
+    }
+});
 
 </script>
 
