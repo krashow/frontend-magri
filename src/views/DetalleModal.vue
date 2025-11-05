@@ -582,12 +582,69 @@ const handleFileUpload = (event) => {
 };
 
 
-const notificarUsuario = () => {
-    if (!newSeguimiento.value.descripcion) {
-        alert("❌ Debes escribir una nota de seguimiento para notificar al usuario.");
-        return;
-    }
-    alert(`📧 Notificación enviada al usuario (${props.incidencia.usuario.nombre}) con la nota de seguimiento actual.`);
+
+const notificarUsuario = async () => {
+    if (!newSeguimiento.value.descripcion) {
+        alert("❌ Debes escribir una nota de seguimiento para notificar al usuario.");
+        return;
+    }
+    const NOTIFIER_URL = "http://localhost:3000/api/notificar-seguimiento";
+    const ultimaNota = {
+        time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+        user: mapaUsuarios.find(u => u.id === ID_USUARIO_ACTUAL)?.nombre || 'Sistema',
+        comment: newSeguimiento.value.descripcion
+    };
+    const todosLosInvolucrados = [];
+    if (props.incidencia.usuario && props.incidencia.usuario.email) {
+        todosLosInvolucrados.push({ 
+            name: props.incidencia.usuario.nombre, 
+            role: 'Reportante', 
+            email: props.incidencia.usuario.email 
+        });
+    }
+    newSeguimiento.value.responsablesInvolucrados.forEach(nombre => {
+        const user = mapaUsuarios.find(u => u.nombre === nombre);
+        if (user && user.email) {
+            if (!todosLosInvolucrados.some(p => p.email === user.email)) {
+                todosLosInvolucrados.push({ 
+                    name: user.nombre, 
+                    role: 'Técnico/CC', 
+                    email: user.email 
+                });
+            }
+        }
+    });
+    if (props.incidencia.usuarioAsignado && props.incidencia.usuarioAsignado.email) {
+        if (!todosLosInvolucrados.some(p => p.email === props.incidencia.usuarioAsignado.email)) {
+             todosLosInvolucrados.push({ 
+                name: props.incidencia.usuarioAsignado.nombre, 
+                role: 'Asignado', 
+                email: props.incidencia.usuarioAsignado.email 
+            });
+        }
+    }
+    const datosParaSeguimiento = {
+        incidentId: props.incidencia.codigoReferencia,
+        status: newSeguimiento.value.nuevoEstado,
+        priority: props.incidencia.prioridad ? props.incidencia.prioridad.nombre : "S/I",
+        assignedTo: props.incidencia.usuarioAsignado ? props.incidencia.usuarioAsignado.nombre : 'Sin Asignar',
+        updateTime: ultimaNota.time + " - " + new Date().toLocaleDateString('es-ES'), 
+        linkToTicket: `https://magriturismo.com/incidencias/${props.incidencia.id}`, 
+        involvedParties: todosLosInvolucrados,
+        history: [ultimaNota] 
+    };
+    if (datosParaSeguimiento.involvedParties.length === 0) {
+        alert("❌ Error de datos: No se pudo encontrar ningún email de destinatario válido.");
+        return;
+    }
+    try {
+        console.log('Enviando datos de seguimiento a Node:', datosParaSeguimiento);
+        const response = await axios.post(NOTIFIER_URL, datosParaSeguimiento);
+        alert(`✅ Notificación de seguimiento enviada con éxito: ${response.data.message}`);
+    } catch (error) {
+        console.error("Error al notificar seguimiento vía Node:", error);
+        alert(`❌ Error al enviar la notificación de seguimiento. Revise la consola y el servidor Node.`);
+    }
 };
 
 
