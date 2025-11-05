@@ -363,11 +363,8 @@ import { defineProps, defineEmits, ref, onMounted, watch } from "vue";
 import axios from "axios";
 import AsignarModal from "/src/views/AsignarModal.vue"; 
 
-// --- CONFIGURACIÓN DE API Y USUARIOS ---
 const BASE_URL = "http://localhost:8081/api/gestion";
-const ID_USUARIO_ACTUAL = 1; // ⚠️ IMPORTANTE: REEMPLAZA ESTE '1' CON EL ID DEL USUARIO LOGUEADO REAL
-
-// Mapeo estático de usuarios: Necesario para enviar IDs en el POST y mostrar Nombres en el GET
+const ID_USUARIO_ACTUAL = 1; 
 const mapaUsuarios = [
     { id: 1, nombre: "Administrador" },
     { id: 2, nombre: "Kevin Agrada" },
@@ -377,14 +374,11 @@ const mapaUsuarios = [
     { id: 6, nombre: "Técnico Soporte" },
 ];
 
-const usuariosDisponibles = ref(mapaUsuarios.map(u => u.nombre)); // Array de nombres para el <select>
-// ------------------------------------
+const usuariosDisponibles = ref(mapaUsuarios.map(u => u.nombre)); 
 
-// --- VARIABLES DE ESTADO ---
 const activeSeguimientoIndex = ref(null);
-const historialGestion = ref([]); // ESTA VARIABLE REEMPLAZA a seguimientoSimulado
-const isProcessing = ref(false); // Para deshabilitar el botón de registro
-// ------------------------------------
+const historialGestion = ref([]);
+const isProcessing = ref(false);
 
 const toggleSeguimiento = (index) => {
   activeSeguimientoIndex.value = activeSeguimientoIndex.value === index ? null : index;
@@ -434,11 +428,6 @@ const getMensajeEstadoDiv = () => {
     return document.getElementById('gestion-mensaje-estado');
 };
 
-// ====================================================================================
-// === FUNCIONES DE GESTIÓN (POST y GET REALES) =======================================
-// ====================================================================================
-
-// Función auxiliar para manejar el POST
 const ejecutarPost = async (data) => {
     isProcessing.value = true;
     const estadoDiv = getMensajeEstadoDiv();
@@ -462,18 +451,14 @@ const ejecutarPost = async (data) => {
 };
 
 
-// Función para obtener y mostrar el historial (GET)
+
 const cargarHistorial = async () => {
     const url = `${BASE_URL}/historial/${props.incidencia.id}`;
     const estadoDiv = getMensajeEstadoDiv();
     if (estadoDiv) estadoDiv.textContent = "🔍 Cargando historial...";
-    
-    // Función auxiliar para convertir IDs (del API) a Nombres (para la tabla)
     const getNamesFromIds = (idString) => {
         if (!idString) return [];
-        // Divide el string "1,2,5" en un array de números
         const ids = idString.toString().split(',').map(s => parseInt(s.trim()));
-        // Mapea cada ID al nombre correspondiente
         return ids.map(id => {
             const user = mapaUsuarios.find(u => u.id === id);
             return user ? user.nombre : `ID ${id}`;
@@ -482,19 +467,16 @@ const cargarHistorial = async () => {
     
     try {
         const respuesta = await axios.get(url);
-        
-        // Mapeo y ajuste de datos del backend a la tabla de Vue
         historialGestion.value = respuesta.data.map(item => ({
-            idGestion: item.id, // Tu API usa 'id' como ID de gestión (bigserial)
-            fecha: formatFechaInput(item.fecha_registro), // Tu API usa 'fecha_registro'
-            usuario: item.nombreUsuario || 'S/I', // Suponemos que tu backend debe incluir el nombre del usuario
+            idGestion: item.id, 
+            fecha: formatFechaInput(item.fecha_registro),
+            usuario: item.nombreUsuario || 'S/I',
             tipo: item.tipo,
             descripcion: item.descripcion,
-            nuevoEstado: item.nuevo_estado, // Tu API usa 'nuevo_estado'
-            tiempoInvertido: item.tiempo_invertido, // Tu API usa 'tiempo_invertido'
-            adjuntoRuta: item.adjunto_ruta, // Tu API usa 'adjunto_ruta'
-            fechaCompromiso: item.fecha_compromiso, // Tu API usa 'fecha_compromiso'
-            // CONVERTIMOS LA CADENA DE IDs A NOMBRES PARA MOSTRAR:
+            nuevoEstado: item.nuevo_estado,
+            tiempoInvertido: item.tiempo_invertido, 
+            adjuntoRuta: item.adjunto_ruta,
+            fechaCompromiso: item.fecha_compromiso, 
             involucrados: getNamesFromIds(item.involucrados), 
             titulo: item.nuevo_estado ? `Cambio a ${item.nuevo_estado}` : item.tipo,
         }));
@@ -508,14 +490,11 @@ const cargarHistorial = async () => {
     }
 };
 
-// Función principal que se llama desde el botón (POST -> GET)
 const registrarGestionCompleto = async () => {
     if (!newSeguimiento.value.descripcion) {
         alert("La nota de seguimiento es obligatoria para registrar una actividad.");
         return;
     }
-    
-    // --- LÓGICA CLAVE: CONVERTIR NOMBRES SELECCIONADOS A IDs (string "1,2,3") ---
     const involucradosIDs = newSeguimiento.value.responsablesInvolucrados
         .map(nombre => {
             const user = mapaUsuarios.find(u => u.nombre === nombre);
@@ -523,10 +502,6 @@ const registrarGestionCompleto = async () => {
         })
         .filter(id => id !== null) 
         .join(','); 
-    // -----------------------------------------------------------------------------
-
-    // 1. Mapeo de datos para el POST (API)
-    // Coincide con la estructura de tu base de datos: id_inc, id_user, nuevo_estado, tiempo_invertido, fecha_compromiso
     const datosParaAPI = {
         "idIncidencia": props.incidencia.id,
         "idUsuario": ID_USUARIO_ACTUAL, 
@@ -536,23 +511,16 @@ const registrarGestionCompleto = async () => {
         "tiempoInvertido": newSeguimiento.value.tiempoInvertido || "0h 0m",
         "adjuntoRuta": newSeguimiento.value.nombreAdjunto, 
         "fechaCompromiso": newSeguimiento.value.fechaCompromiso || null,
-        "involucrados": involucradosIDs || null, // Se envía la cadena de IDs
+        "involucrados": involucradosIDs || null, 
     };
-
-    // 2. Ejecutar POST
     const postExitoso = await ejecutarPost(datosParaAPI);
 
     if (postExitoso) {
-        // 3. Recargar el historial para actualizar la tabla (GET)
         await cargarHistorial();
-
-        // 4. Actualizar el estado de la incidencia si cambió
         props.incidencia.estado.tipo = datosParaAPI.nuevoEstado;
         if (datosParaAPI.fechaCompromiso) {
             props.incidencia.fechaSLA = datosParaAPI.fechaCompromiso;
         }
-        
-        // 5. Limpiar el formulario
         newSeguimiento.value.descripcion = "";
         newSeguimiento.value.fecha = new Date().toISOString().substring(0, 16);
         newSeguimiento.value.nuevoEstado = props.incidencia.estado.tipo;
@@ -567,13 +535,11 @@ const registrarGestionCompleto = async () => {
     }
 };
 
-// Función modificada para usar la nueva lógica (solo si es necesario)
 const resolverIncidencia = async () => {
     const estadoActual = props.incidencia.estado.tipo;
     if (estadoActual === 'En Proceso' || estadoActual === 'Pendiente de Usuario') {
         const confirmacion = confirm(`¿Estás seguro de que deseas cambiar el estado a "Resuelta (Verificación)"?`);
         if (confirmacion) {
-            // Creamos un registro de gestión para el cambio de estado (POST)
             const datosParaAPI = {
                 "idIncidencia": props.incidencia.id,
                 "idUsuario": ID_USUARIO_ACTUAL,
@@ -598,10 +564,6 @@ const resolverIncidencia = async () => {
         alert("La incidencia debe estar en estado 'En Proceso' o 'Pendiente de Usuario' para usar esta acción rápida.");
     }
 };
-
-// ====================================================================================
-// === LLAMADAS INICIALES Y AUXILIARES (SE MANTIENEN) =================================
-// ====================================================================================
 
 const addResponsable = () => {
     if (selectedResponsable.value && !newSeguimiento.value.responsablesInvolucrados.includes(selectedResponsable.value)) {
@@ -703,12 +665,10 @@ const mostrarMensajeExito = (mensaje) => {
   alert("✅ " + mensaje);
 };
 
-// Cargar el historial cuando el componente se monta por primera vez
 onMounted(() => {
     cargarHistorial();
 });
 
-// Watcher para recargar el historial si se cambia a la pestaña 'seguimiento' (opcional, pero útil)
 watch(activeTab, (newTab) => {
     if (newTab === 'seguimiento') {
         cargarHistorial();
