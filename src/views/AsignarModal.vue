@@ -70,125 +70,155 @@
 import axios from "axios";
 
 export default {
-  props: {
-    incidencia: {
-      type: Object,
-      required: true,
+  props: {
+    incidencia: {
+      type: Object,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      idResponsableSeleccionado: null,
+      observacion: "",
+      listaResponsables: [],
+      cargandoResponsables: false,
+      cargando: false,
+      errorMensaje: null,
+      BASE_URL: "http://localhost:8081",
+      NOTIFIER_URL: "http://localhost:3000", 
+    };
+  },
+  methods: {
+    async cargarResponsables() {
+      this.cargandoResponsables = true;
+      this.errorMensaje = null;
+      try {
+        const response = await axios.get(
+          `${this.BASE_URL}/api/usuarios/responsables`
+        );
+        this.listaResponsables = response.data;
+        console.log("✅ Responsables cargados con éxito.");
+      } catch (error) {
+        console.error(
+          "❌ Error al cargar responsables:",
+          error.response || error
+        );
+
+        let mensaje = "No se pudieron cargar los responsables. ";
+
+        if (error.response && error.response.status === 403) {
+          mensaje +=
+            "Acceso denegado (Error 403). Confirma que la seguridad de Spring Boot permite la ruta /api/usuarios/responsables sin autenticar.";
+        } else if (error.response && error.response.status === 404) {
+          mensaje +=
+            "Ruta no encontrada (Error 404). Verifica que el endpoint `/api/usuarios/responsables` exista y que el puerto sea `8081`.";
+        } else {
+          mensaje +=
+            "Revisa la URL, el puerto (8081), y los permisos del backend.";
+        }
+
+        this.errorMensaje = mensaje;
+      } finally {
+        this.cargandoResponsables = false;
+      }
+    },
+    async notificarAsignacion(incidenciaActualizada, responsableAsignado) {
+        const emailData = {
+            assignedTo: responsableAsignado.nombre,
+            assignedToEmail: responsableAsignado.email,
+            incidentId: `INC-${incidenciaActualizada.id}`,
+            status: incidenciaActualizada.estado?.tipo || 'Asignada', 
+            priority: this.incidencia.prioridad || 'Media', 
+            reporter: this.incidencia.usuario?.nombre || 'S/I', 
+            creationDate: this.incidencia.fechaCreacion ? new Date(this.incidencia.fechaCreacion).toLocaleString() : new Date().toLocaleString(),
+            description: this.incidencia.dscInc || this.incidencia.descripcionInc || 'Sin descripción.',
+            linkToTicket: `http://localhost:8080/incidencias/${incidenciaActualizada.id}`, 
+            assignedBy: 'Sistema/Administrador', 
+        };
+
+        try {
+            await axios.post(`${this.NOTIFIER_URL}/api/notificar-asignacion`, emailData);
+            console.log(`✅ Solicitud de notificación enviada al Notificador Node para ${responsableAsignado.nombre}.`);
+        } catch (error) {
+            console.error("❌ Error al solicitar la notificación por correo (Node Service):", error.response || error);
+            this.$emit("mensajeGlobal", `⚠️ Advertencia: Incidencia asignada, pero falló el envío de correo.`);
+        }
     },
-  },
-  data() {
-    return {
-      idResponsableSeleccionado: null,
-      observacion: "",
-      listaResponsables: [],
-      cargandoResponsables: false,
-      cargando: false,
-      errorMensaje: null,
-      BASE_URL: "http://localhost:8081",
-    };
-  },
-  methods: {
-    async cargarResponsables() {
-      this.cargandoResponsables = true;
-      this.errorMensaje = null;
-      try {
-        const response = await axios.get(
-          `${this.BASE_URL}/api/usuarios/responsables`
-        );
-        this.listaResponsables = response.data;
-        console.log("✅ Responsables cargados con éxito.");
-      } catch (error) {
-        console.error(
-          "❌ Error al cargar responsables:",
-          error.response || error
-        );
 
-        let mensaje = "No se pudieron cargar los responsables. ";
-
-        if (error.response && error.response.status === 403) {
-          mensaje +=
-            "Acceso denegado (Error 403). Confirma que la seguridad de Spring Boot permite la ruta /api/usuarios/responsables sin autenticar.";
-        } else if (error.response && error.response.status === 404) {
-          mensaje +=
-            "Ruta no encontrada (Error 404). Verifica que el endpoint `/api/usuarios/responsables` exista y que el puerto sea `8081`.";
+    async asignarIncidencia() {
+      if (!this.idResponsableSeleccionado) {
+        this.errorMensaje = "Debes seleccionar un responsable.";
+        return;
+      }
+      this.cargando = true;
+      this.errorMensaje = null;
+      const asignacionData = {
+        idIncidencia: this.incidencia.id,
+        idResponsable: this.idResponsableSeleccionado,
+        observacion: this.observacion,
+      };
+      console.log("Datos de asignación a enviar:", asignacionData);
+      try {
+        const endpoint = `${this.BASE_URL}/api/incidencias/asignar-responsable`;
+        const response = await axios.post(endpoint, asignacionData);
+        const incidenciaActualizada = response.data;
+        const responsableAsignado = this.listaResponsables.find(r => r.id === this.idResponsableSeleccionado);
+        if (responsableAsignado && responsableAsignado.email) {
+            this.notificarAsignacion(incidenciaActualizada, responsableAsignado); 
         } else {
-          mensaje +=
-            "Revisa la URL, el puerto (8081), y los permisos del backend.";
+            console.warn("No se pudo notificar: Responsable no encontrado o le falta el campo 'email'.");
         }
+        this.$emit(
+          "mensajeGlobal",
+          `Incidencia #${incidenciaActualizada.id} asignada a ${incidenciaActualizada.responsable.nombre} correctamente.`
+        );
+        this.$emit("asignacionExitosa", incidenciaActualizada);
+        this.$emit("close");
+        console.log(
+          `✅ Incidencia #${this.incidencia.id} asignada con éxito al técnico.`
+        );
+        console.log("Respuesta del servidor:", incidenciaActualizada);
+      } catch (error) {
+        console.error("❌ Error al asignar:", error.response || error);
+        let mensaje = "Error de red/servidor. Intenta de nuevo.";
 
-        this.errorMensaje = mensaje;
-      } finally {
-        this.cargandoResponsables = false;
-      }
-    },
-    async asignarIncidencia() {
-      if (!this.idResponsableSeleccionado) {
-        this.errorMensaje = "Debes seleccionar un responsable.";
-        return;
-      }
-      this.cargando = true;
-      this.errorMensaje = null;
-      const asignacionData = {
-        idIncidencia: this.incidencia.id,
-        idResponsable: this.idResponsableSeleccionado,
-        observacion: this.observacion,
-      };
-      console.log("Datos de asignación a enviar:", asignacionData);
-      try {
-        const endpoint = `${this.BASE_URL}/api/incidencias/asignar-responsable`;
-        const response = await axios.post(endpoint, asignacionData);
-        const incidenciaActualizada = response.data;
-        this.$emit(
-          "mensajeGlobal",
-          `Incidencia #${incidenciaActualizada.id} asignada a ${incidenciaActualizada.responsable.nombre} correctamente.`
-        );
-        this.$emit("asignacionExitosa", incidenciaActualizada);
-        this.$emit("close");
-        console.log(
-          `✅ Incidencia #${this.incidencia.id} asignada con éxito al técnico.`
-        );
-        console.log("Respuesta del servidor:", incidenciaActualizada);
-      } catch (error) {
-        console.error("❌ Error al asignar:", error.response || error);
-        let mensaje = "Error de red/servidor. Intenta de nuevo.";
-
-        if (error.response) {
-          switch (error.response.status) {
-            case 403:
-              mensaje =
-                "Acceso denegado (Error 403). El servidor requiere autenticación para asignar.";
-              break;
-            case 404:
-              mensaje =
-                "Error: Incidencia o usuario no encontrado en la base de datos (Error 404).";
-              break;
-            case 409:
-              mensaje =
-                "Acción denegada: No se puede asignar un responsable a una incidencia que ya está Cerrada.";
-              break;
-            case 500:
-              mensaje =
-                "Error interno del servidor (500). Revisa la consola de tu servidor Spring Boot.";
-              break;
-            default:
-              mensaje = `Error al asignar: ${error.response.status} - ${
-                error.response.statusText || "Error desconocido"
-              }.`;
-          }
-        }
-        this.errorMensaje = mensaje;
-      } finally {
-        this.cargando = false;
-      }
-    },
-  },
-  mounted() {
-    this.cargarResponsables();
-    console.log(
-      "Modal de Asignación Abierto. Propiedad Incidencia:",
-      this.incidencia
-    );
-  },
+        if (error.response) {
+          switch (error.response.status) {
+            case 403:
+              mensaje =
+                "Acceso denegado (Error 403). El servidor requiere autenticación para asignar.";
+              break;
+            case 404:
+              mensaje =
+                "Error: Incidencia o usuario no encontrado en la base de datos (Error 404).";
+              break;
+            case 409:
+              mensaje =
+                "Acción denegada: No se puede asignar un responsable a una incidencia que ya está Cerrada.";
+              break;
+            case 500:
+              mensaje =
+                "Error interno del servidor (500). Revisa la consola de tu servidor Spring Boot.";
+              break;
+            default:
+              mensaje = `Error al asignar: ${error.response.status} - ${
+                error.response.statusText || "Error desconocido"
+              }.`;
+          }
+        }
+        this.errorMensaje = mensaje;
+      } finally {
+        this.cargando = false;
+      }
+    },
+  },
+  mounted() {
+    this.cargarResponsables();
+    console.log(
+      "Modal de Asignación Abierto. Propiedad Incidencia:",
+      this.incidencia
+    );
+  },
 };
 </script>
 
