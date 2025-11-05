@@ -86,7 +86,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="incidencia in incidencias" :key="incidencia.id">
+              <tr v-for="incidencia in incidenciasOrdenadas" :key="incidencia.id">
                 <td>{{ incidencia.id }}</td>
                 <td>{{ formatFecha(incidencia.fechaRegistro) }}</td>
                 <td>
@@ -94,7 +94,9 @@
                 </td>
                 <td>{{ incidencia.categoria.nombre }}</td>
                 <td>{{ incidencia.area ? incidencia.area.nombre : "S/I" }}</td>
-                <td>
+                <td
+                  :class="prioridadClass(incidencia.prioridad ? incidencia.prioridad.nombre : 'S/I')"
+                >
                   {{
                     incidencia.prioridad ? incidencia.prioridad.nombre : "S/I"
                   }}
@@ -114,9 +116,6 @@
                   >
                     <i class="fas fa-eye"></i>
                   </button>
-                  <!--<button @click="asignar(incidencia.id)" class="btn-action assign">
-                                        <i class="fas fa-user-plus"></i>
-                                    </button>-->
                   <button
                     @click="confirmarEliminar(incidencia.id)"
                     class="btn-action delete"
@@ -128,7 +127,7 @@
             </tbody>
           </table>
 
-          <div v-if="incidencias.length === 0" class="no-data">
+          <div v-if="incidenciasOrdenadas.length === 0" class="no-data">
             No hay incidencias registradas.
           </div>
         </div>
@@ -144,7 +143,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue"; // <-- Importado 'computed'
 import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
 import "./Dashboard.css";
@@ -179,6 +178,33 @@ const cargarIncidencias = async () => {
     alert("❌ No se pudieron cargar las incidencias.");
   }
 };
+
+// --- Lógica de Ordenación por Prioridad ---
+const getPrioridadOrder = (prioridadNombre) => {
+  const order = {
+    "Crítica": 1,
+    "Alta": 2,
+    "Media": 3,
+    "Baja": 4,
+    "S/I": 5, // Incidencias sin prioridad definida van al final
+  };
+  return order[prioridadNombre] || 99;
+};
+
+const incidenciasOrdenadas = computed(() => {
+  return [...incidencias.value].sort((a, b) => {
+    const prioA = a.prioridad ? a.prioridad.nombre : "S/I";
+    const prioB = b.prioridad ? b.prioridad.nombre : "S/I";
+
+    const orderA = getPrioridadOrder(prioA);
+    const orderB = getPrioridadOrder(prioB);
+
+    // Orden ascendente de número (Crítica: 1 -> Baja: 4)
+    return orderA - orderB;
+  });
+});
+// ------------------------------------------
+
 const verDetalle = async (id) => {
   try {
     const url = `http://localhost:8081/api/incidencias/detalle?id=${id}`;
@@ -275,6 +301,22 @@ const estadoClass = (estadoTipo) => {
       return "status-closed";
     default:
       return "status-default";
+  }
+};
+
+// --- Función para obtener la clase de color de la prioridad ---
+const prioridadClass = (prioridadTipo) => {
+  switch (prioridadTipo) {
+    case "Crítica":
+      return "prio-critica";
+    case "Alta":
+      return "prio-alta";
+    case "Media":
+      return "prio-media";
+    case "Baja":
+      return "prio-baja";
+    default:
+      return "prio-default";
   }
 };
 
