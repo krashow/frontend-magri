@@ -644,17 +644,6 @@
 
 
 
-
-
-
-
-
-
-
-
-/* --- Estilos para la Columna de Prioridad --- */
-
-/* Estilo general para las celdas de prioridad */
 td.prio-critica,
 td.prio-alta,
 td.prio-media,
@@ -662,47 +651,40 @@ td.prio-baja,
 td.prio-default {
     font-weight: bold;
     border-radius: 4px;
-    padding: 4px 8px; /* Un poco más de padding */
+    padding: 4px 8px; 
     display: inline-block;
-    min-width: 80px; /* Asegura un ancho mínimo para todas */
+    min-width: 80px;
     text-align: center;
-    margin: 5px 0; /* Espaciado dentro de la celda TD */
+    margin: 5px 0; 
 }
-
-/* Centrar el contenido de la columna Prioridad (la 6ta columna) */
 .data-table tbody tr td:nth-child(6) {
     text-align: center;
 }
 
-/* Prioridad Crítica (Rojo) */
 .prio-critica {
-    background-color: #fdd8d8; /* Rojo muy claro */
-    color: #c00000; /* Rojo oscuro */
+    background-color: #fdd8d8;
+    color: #c00000; 
     border: 1px solid #c00000;
 }
 
-/* Prioridad Alta (Naranja) */
 .prio-alta {
-    background-color: #ffe0b2; /* Naranja muy claro */
-    color: #ff6f00; /* Naranja oscuro */
+    background-color: #ffe0b2; 
+    color: #ff6f00; 
     border: 1px solid #ff6f00;
 }
 
-/* Prioridad Media (Amarillo/Dorado) */
 .prio-media {
-    background-color: #fff9c4; /* Amarillo claro */
-    color: #fbc02d; /* Dorado/Amarillo oscuro */
+    background-color: #fff9c4; 
+    color: #fbc02d; 
     border: 1px solid #fbc02d;
 }
 
-/* Prioridad Baja (Verde) */
 .prio-baja {
-    background-color: #c8e6c9; /* Verde muy claro */
-    color: #388e3c; /* Verde oscuro */
+    background-color: #c8e6c9; 
+    color: #388e3c;
     border: 1px solid #388e3c;
 }
 
-/* Prioridad por defecto / S/I (Gris) */
 .prio-default {
     background-color: #f5f5f5;
     color: #757575;
