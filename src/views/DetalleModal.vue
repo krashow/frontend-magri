@@ -584,43 +584,72 @@ const handleFileUpload = (event) => {
 
 
 const notificarUsuario = async () => {
+    const getEmailForUser = (nombre) => {
+        const domain = "@magriturismo.com";
+        if (nombre === "Administrador") {
+            return "kevin.agrada" + domain; 
+        }
+        const emailPrefix = nombre
+            .toLowerCase()
+            .trim()
+            .replace(/ /g, '.')
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, ""); 
+
+        if (!emailPrefix) return null;
+        return emailPrefix + domain;
+    };
     if (!newSeguimiento.value.descripcion) {
         alert("❌ Debes escribir una nota de seguimiento para notificar al usuario.");
         return;
     }
-    const NOTIFIER_URL = "http://localhost:3000/api/notificar-seguimiento";
+    const NOTIFIER_URL = "http://localhost:3000/api/notificar-seguimiento"; 
     const ultimaNota = {
         time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
         user: mapaUsuarios.find(u => u.id === ID_USUARIO_ACTUAL)?.nombre || 'Sistema',
         comment: newSeguimiento.value.descripcion
     };
     const todosLosInvolucrados = [];
-    if (props.incidencia.usuario && props.incidencia.usuario.email) {
-        todosLosInvolucrados.push({ 
-            name: props.incidencia.usuario.nombre, 
-            role: 'Reportante', 
-            email: props.incidencia.usuario.email 
-        });
+    const emailsProcesados = new Set();
+    if (props.incidencia.usuario && props.incidencia.usuario.nombre) {
+        const nombreReportante = props.incidencia.usuario.nombre;
+        const email = getEmailForUser(nombreReportante);
+        
+        if (email && !emailsProcesados.has(email)) {
+             todosLosInvolucrados.push({ 
+                name: nombreReportante, 
+                role: 'Reportante', 
+                email: email
+            });
+            emailsProcesados.add(email);
+        }
     }
-    newSeguimiento.value.responsablesInvolucrados.forEach(nombre => {
-        const user = mapaUsuarios.find(u => u.nombre === nombre);
-        if (user && user.email) {
-            if (!todosLosInvolucrados.some(p => p.email === user.email)) {
+    newSeguimiento.value.responsablesInvolucrados.forEach(nombreCC => {
+        const user = mapaUsuarios.find(u => u.nombre === nombreCC);
+        if (user) {
+            const email = getEmailForUser(user.nombre);
+            
+            if (email && !emailsProcesados.has(email)) {
                 todosLosInvolucrados.push({ 
                     name: user.nombre, 
                     role: 'Técnico/CC', 
-                    email: user.email 
+                    email: email 
                 });
+                emailsProcesados.add(email);
             }
         }
     });
-    if (props.incidencia.usuarioAsignado && props.incidencia.usuarioAsignado.email) {
-        if (!todosLosInvolucrados.some(p => p.email === props.incidencia.usuarioAsignado.email)) {
+    if (props.incidencia.usuarioAsignado && props.incidencia.usuarioAsignado.nombre) {
+        const nombreAsignado = props.incidencia.usuarioAsignado.nombre;
+        const email = getEmailForUser(nombreAsignado);
+
+        if (email && !emailsProcesados.has(email)) {
              todosLosInvolucrados.push({ 
-                name: props.incidencia.usuarioAsignado.nombre, 
+                name: nombreAsignado, 
                 role: 'Asignado', 
-                email: props.incidencia.usuarioAsignado.email 
+                email: email 
             });
+            emailsProcesados.add(email);
         }
     }
     const datosParaSeguimiento = {
@@ -634,7 +663,7 @@ const notificarUsuario = async () => {
         history: [ultimaNota] 
     };
     if (datosParaSeguimiento.involvedParties.length === 0) {
-        alert("❌ Error de datos: No se pudo encontrar ningún email de destinatario válido.");
+        alert("❌ Error: No se pudo generar o encontrar ningún email de destinatario válido.");
         return;
     }
     try {
