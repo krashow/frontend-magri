@@ -4,7 +4,6 @@
       <div class="sidebar-logo">
         <img src="/logo.png" alt="Logo" />
       </div>
-
       <nav class="menu">
         <ul>
           <li :class="{ active: currentRoute === '/dashboard' }" @click="navigateTo('/dashboard')">
@@ -42,7 +41,6 @@
           </li>
         </ul>
       </nav>
-
       <div class="sidebar-bottom">
         <button class="icon-btn"><i class="fas fa-cog"></i></button>
         <button @click="logout" class="icon-btn logout">
@@ -50,7 +48,6 @@
         </button>
       </div>
     </aside>
-
     <main class="main-content">
       <header class="header">
         <div class="user-info">
@@ -58,10 +55,8 @@
           <span>{{ userName }}</span>
         </div>
       </header>
-
       <section class="form-section">
         <h2>Registrar Nueva Incidencia</h2>
-
         <div class="form-group">
           <label for="categoria">Categoría:</label>
           <select v-model="categoriaSeleccionada" @change="cargarPreguntas">
@@ -71,7 +66,6 @@
             <option value="3">Otro</option>
           </select>
         </div>
-
         <div class="form-group">
           <label for="area">Área:</label>
           <select v-model="areaSeleccionada">
@@ -81,7 +75,6 @@
             <option :value="3">Operaciones</option>
           </select>
         </div>
-
         <div class="form-group">
           <label for="prioridad">Urgencia / Prioridad:</label>
           <select v-model="prioridadSeleccionada">
@@ -92,20 +85,16 @@
             <option :value="4">Crítica</option>
           </select>
         </div>
-
         <div v-if="preguntas.length > 0" class="preguntas-box">
           <h3>Detalles de la incidencia</h3>
-
           <div v-for="pregunta in preguntas" :key="pregunta.id" class="form-group">
             <label>{{ pregunta.pregunta }}</label>
-
             <input
               v-if="pregunta.tipoCampo === 'text'"
               v-model="respuestas[pregunta.id]"
               type="text"
               placeholder="Escriba su respuesta"
             />
-
             <input
               v-else-if="pregunta.tipoCampo === 'date'"
               v-model="respuestas[pregunta.id]"
@@ -118,14 +107,12 @@
                     v-model="respuestas[pregunta.id]"
                 />
                 <label :for="'check-' + pregunta.id">Marcar si aplica</label>
-            </div>
-            
+            </div>           
             <textarea
               v-else-if="pregunta.tipoCampo === 'textarea'"
               v-model="respuestas[pregunta.id]"
               placeholder="Describa brevemente"
             ></textarea>
-
             <select
               v-else-if="pregunta.tipoCampo === 'select'"
               v-model="respuestas[pregunta.id]"
@@ -133,8 +120,7 @@
               <option disabled value="">Seleccione una opción</option>
               <option value="Sí">Sí</option>
               <option value="No">No</option>
-            </select>
-            
+            </select>   
             <p v-else style="color: red; font-size: 12px;">Error: Tipo de campo '{{ pregunta.tipoCampo }}' no soportado.</p>
 
           </div>
