@@ -143,7 +143,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue"; // <-- Importado 'computed'
+import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
 import "./Dashboard.css";
@@ -179,14 +179,13 @@ const cargarIncidencias = async () => {
   }
 };
 
-// --- Lógica de Ordenación por Prioridad ---
 const getPrioridadOrder = (prioridadNombre) => {
   const order = {
     "Crítica": 1,
     "Alta": 2,
     "Media": 3,
     "Baja": 4,
-    "S/I": 5, // Incidencias sin prioridad definida van al final
+    "S/I": 5,
   };
   return order[prioridadNombre] || 99;
 };
@@ -198,12 +197,9 @@ const incidenciasOrdenadas = computed(() => {
 
     const orderA = getPrioridadOrder(prioA);
     const orderB = getPrioridadOrder(prioB);
-
-    // Orden ascendente de número (Crítica: 1 -> Baja: 4)
     return orderA - orderB;
   });
 });
-// ------------------------------------------
 
 const verDetalle = async (id) => {
   try {
@@ -273,7 +269,6 @@ const eliminarIncidencia = async (id) => {
     alert("❌ Error al eliminar la incidencia. Revise la consola del backend.");
   }
 };
-// Funciones de utilidad para la tabla
 const formatFecha = (dateTimeStr) => {
   if (!dateTimeStr) return "N/A";
   const date = new Date(dateTimeStr);
@@ -304,7 +299,6 @@ const estadoClass = (estadoTipo) => {
   }
 };
 
-// --- Función para obtener la clase de color de la prioridad ---
 const prioridadClass = (prioridadTipo) => {
   switch (prioridadTipo) {
     case "Crítica":
@@ -320,17 +314,14 @@ const prioridadClass = (prioridadTipo) => {
   }
 };
 
-// Logout
 const logout = () => {
   if (window.confirm("¿Seguro que deseas cerrar sesión?")) {
     router.push("/login");
   }
 };
 
-// Navegación
 const navigateTo = (path) => {
   router.push(path);
 };
 </script>
-
 <style scoped src="./Dashboard.css"></style>
