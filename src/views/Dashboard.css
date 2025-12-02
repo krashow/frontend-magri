@@ -951,3 +951,112 @@ hr {
     border-top: 1px solid #ecf0f1;
     margin: 20px 0;
 }
+/* --- Estilos para la nueva estructura --- */
+
+/* Contenedor de KPIs - Usando Grid para 4 columnas */
+.kpi-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Estilos de las tarjetas KPI */
+.kpi-cards .card.kpi {
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: #ffffff;
+}
+
+.kpi-cards .card.kpi h3 {
+    font-size: 1em;
+    color: #666;
+    margin-top: 5px;
+}
+
+.kpi-cards .card.kpi i {
+    font-size: 1.5em;
+    margin-bottom: 5px;
+    color: #333; /* Color base del icono */
+}
+
+.kpi-value {
+  font-size: 2.2em;
+  font-weight: 700;
+  color: #333;
+  line-height: 1;
+}
+
+.kpi-detail {
+    font-size: 0.85em;
+    color: #999;
+    margin-top: 5px;
+}
+
+/* Contenedor de Widgets - Usando Flexbox para disposición lado a lado */
+.dashboard-widgets {
+  display: flex;
+  flex-wrap: wrap; 
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.widget {
+  background-color: #ffffff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.half-width {
+  flex: 1 1 calc(50% - 10px); /* Ocupa el 50% menos la mitad del gap */
+  min-width: 350px; 
+}
+
+/* Estilos de tabla y tags */
+.quick-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.quick-table th, .quick-table td {
+    padding: 10px 0;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+/* Etiquetas de prioridad en la tabla */
+.priority-tag {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.priority-tag.high { background-color: #fee2e2; color: #dc2626; } /* Rojo */
+.priority-tag.medium { background-color: #fffae3; color: #d97706; } /* Naranja */
+.priority-tag.low { background-color: #ecfdf5; color: #059669; } /* Verde */
+
+/* Placeholder para gráficos */
+.chart-placeholder {
+    height: 200px;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #999;
+    font-style: italic;
+    border: 1px dashed #ccc;
+    margin-top: 15px;
+}
+
+.widget-footer {
+    margin-top: 15px;
+    text-align: right;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}

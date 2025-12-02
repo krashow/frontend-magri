@@ -67,32 +67,75 @@
         </div>
       </header>
 
-      <section class="stats">
-        <div class="card">
-          <h3>Incidencias Abiertas</h3>
-          <p>12</p>
+
+
+
+      <section class="kpi-cards">
+        <div class="card kpi action-required">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h3>Pendientes de Atención</h3>
+          <p class="kpi-value">**12**</p>
+          <span class="kpi-detail">Incidencias sin asignar o abiertas.</span>
         </div>
-        <div class="card">
-          <h3>En Progreso</h3>
-          <p>8</p>
+
+        <div class="card kpi high-priority">
+          <i class="fas fa-fire-alt"></i>
+          <h3>Alta Prioridad</h3>
+          <p class="kpi-value">**3**</p>
+          <span class="kpi-detail">Requieren acción inmediata.</span>
         </div>
-        <div class="card">
-          <h3>Cerradas</h3>
-          <p>25</p>
+
+        <div class="card kpi avg-time">
+          <i class="fas fa-hourglass-half"></i>
+          <h3>T. Promedio Res.</h3>
+          <p class="kpi-value">**4.2 h**</p>
+          <span class="kpi-detail">Objetivo: Menos de 4h.</span>
         </div>
-        <div class="card">
-          <h3>Usuarios Activos</h3>
-          <p>5</p>
+
+        <div class="card kpi closed-month">
+          <i class="fas fa-check-double"></i>
+          <h3>Cerradas (Mes)</h3>
+          <p class="kpi-value">**25**</p>
+          <span class="kpi-detail">Productividad total del mes.</span>
         </div>
       </section>
 
-      <section class="summary">
-        <h3>Resumen</h3>
-        <p>
-          Desde este panel podrás gestionar las incidencias, asignarlas al
-          personal adecuado, generar reportes y administrar usuarios.
-        </p>
+      <section class="dashboard-widgets">
+        <div class="widget table-container half-width">
+          <h3>Mis Asignaciones Pendientes</h3>
+          <table class="quick-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Prioridad</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1002</td><td>Error en módulo de Reportes</td><td><span class="priority-tag high">Alta</span></td><td>En Progreso</td></tr>
+              <tr><td>0998</td><td>Problema con VPN de usuario</td><td><span class="priority-tag medium">Media</span></td><td>Abierta</td></tr>
+              <tr><td>0980</td><td>Solicitud de nuevo hardware</td><td><span class="priority-tag low">Baja</span></td><td>Asignada</td></tr>
+              </tbody>
+          </table>
+          <div class="widget-footer">
+            <a href="#" @click.prevent="navigateTo('/incidencias')">Ver todas las asignaciones →</a>
+          </div>
+        </div>
+        
+        <div class="widget chart-container half-width">
+          <h3>📈 Distribución por Categoría</h3>
+          <div class="placeholder chart-placeholder">
+            <p>(Ej: Software, Hardware, Redes)</p>
+          </div>
+          <div class="widget-footer">
+            <a href="#" @click.prevent="navigateTo('/reportes')">Ver Detalle en Reportes →</a>
+          </div>
+        </div>
       </section>
+
+
+      
     </main>
   </div>
 </template>
