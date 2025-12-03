@@ -67,9 +67,6 @@
         </div>
       </header>
 
-
-
-
       <section class="kpi-cards">
         <div class="card kpi action-required">
           <i class="fas fa-exclamation-triangle"></i>
@@ -95,7 +92,7 @@
         <div class="card kpi closed-month">
           <i class="fas fa-check-double"></i>
           <h3>Cerradas (Mes)</h3>
-          <p class="kpi-value">**25**</p>
+          <p class="kpi-value">**2**</p>
           <span class="kpi-detail">Productividad total del mes.</span>
         </div>
       </section>

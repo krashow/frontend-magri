@@ -994,7 +994,6 @@ hr {
     margin-top: 5px;
 }
 
-/* Contenedor de Widgets - Usando Flexbox para disposición lado a lado */
 .dashboard-widgets {
   display: flex;
   flex-wrap: wrap; 
@@ -1010,7 +1009,7 @@ hr {
 }
 
 .half-width {
-  flex: 1 1 calc(50% - 10px); /* Ocupa el 50% menos la mitad del gap */
+  flex: 1 1 calc(50% - 10px);
   min-width: 350px; 
 }
 
