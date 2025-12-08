@@ -358,44 +358,46 @@
     @mensajeGlobal="mostrarMensajeExito"
   />
 </template>
+
 <script setup>
 import { defineProps, defineEmits, ref, onMounted, watch } from "vue";
 import axios from "axios";
-import AsignarModal from "/src/views/AsignarModal.vue"; 
+import AsignarModal from "/src/views/AsignarModal.vue"; 
 
-const BASE_URL = "http://localhost:8081/api/gestion";
-const ID_USUARIO_ACTUAL = 1; 
+// --- CONFIGURACIÓN DE DESPLIEGUE (IP REAL) ---
+// La ruta base para el Spring Boot (8081) se asume que se maneja globalmente por la URL relativa /api/gestion
+const API_BASE_PATH = "/api/gestion"; 
+
+// CAMBIO CRÍTICO 1: Volvemos a la IP real para el despliegue del Notificador (3000)
+const NOTIFIER_URL = "http://192.168.1.116:3000/api/notificar-seguimiento";  
+
+const ID_USUARIO_ACTUAL = 1; 
 const mapaUsuarios = [
-    { id: 1, nombre: "Administrador" },
-    { id: 2, nombre: "Kevin Agrada" },
-    { id: 3, nombre: "Juan Perez" },
-    { id: 4, nombre: "user1" },
-    { id: 5, nombre: "user2" },
-    { id: 6, nombre: "Técnico Soporte" },
+    { id: 1, nombre: "Administrador" },
+    { id: 2, nombre: "Kevin Agrada" },
+    { id: 3, nombre: "Juan Perez" },
+    { id: 4, nombre: "user1" },
+    { id: 5, nombre: "user2" },
+    { id: 6, nombre: "Técnico Soporte" },
 ];
-
-const usuariosDisponibles = ref(mapaUsuarios.map(u => u.nombre)); 
-
+const usuariosDisponibles = ref(mapaUsuarios.map(u => u.nombre)); 
 const activeSeguimientoIndex = ref(null);
 const historialGestion = ref([]);
 const isProcessing = ref(false);
-
 const toggleSeguimiento = (index) => {
   activeSeguimientoIndex.value = activeSeguimientoIndex.value === index ? null : index;
 };
-
 const props = defineProps({
   incidencia: {
     type: Object,
     required: true,
   },
-  fechaSLA: { 
-      type: String, 
-      default: null 
-  } 
+  fechaSLA: { 
+      type: String, 
+      default: null 
+  } 
 });
-
-const $emit = defineEmits(["cerrar", "editar"]); 
+const $emit = defineEmits(["cerrar", "editar"]); 
 
 const activeTab = ref("vista");
 const mostrarAsignarModal = ref(false);
@@ -418,157 +420,160 @@ const newSeguimiento = ref({
   fecha: new Date().toISOString().substring(0, 16),
   nuevoEstado: props.incidencia.estado.tipo,
   responsablesInvolucrados: [],
-  nombreAdjunto: null, 
-  tiempoInvertido: "",          
-  fechaCompromiso: "",         
-  tipo: "Nota",               
+  nombreAdjunto: null, 
+  tiempoInvertido: "",          
+  fechaCompromiso: "",         
+  tipo: "Nota",               
 });
 
 const getMensajeEstadoDiv = () => {
-    return document.getElementById('gestion-mensaje-estado');
+    return document.getElementById('gestion-mensaje-estado');
 };
 
+// --- FUNCIÓN EJECUTAR POST (8081) - SIN CAMBIOS EN ENDPOINT ---
 const ejecutarPost = async (data) => {
-    isProcessing.value = true;
-    const estadoDiv = getMensajeEstadoDiv();
-    if (estadoDiv) estadoDiv.textContent = "📝 Enviando registro de gestión...";
-    
-    try {
-        await axios.post(`${BASE_URL}/registrar`, data);
+    isProcessing.value = true;
+    const estadoDiv = getMensajeEstadoDiv();
+    if (estadoDiv) estadoDiv.textContent = "📝 Enviando registro de gestión...";
+    
+    try {
+        // Usa la ruta relativa API_BASE_PATH (Asumimos que el baseURL está en 192.168.1.116:8081)
+        await axios.post(`${API_BASE_PATH}/registrar`, data);
 
-        if (estadoDiv) estadoDiv.textContent = "✅ Gestión registrada con éxito. Actualizando historial...";
-        return true; 
+        if (estadoDiv) estadoDiv.textContent = "✅ Gestión registrada con éxito. Actualizando historial...";
+        return true; 
 
-    } catch (error) {
-        console.error("Error en el registro de gestión:", error);
-        const errorMessage = error.response?.data?.mensaje || `Error ${error.response?.status || 500} al registrar.`;
-        if (estadoDiv) estadoDiv.textContent = `❌ Error al registrar: ${errorMessage}`;
-        return false;
+    } catch (error) {
+        console.error("Error en el registro de gestión:", error);
+        const errorMessage = error.response?.data?.mensaje || `Error ${error.response?.status || 500} al registrar.`;
+        if (estadoDiv) estadoDiv.textContent = `❌ Error al registrar: ${errorMessage}`;
+        return false;
 
-    } finally {
-        isProcessing.value = false;
-    }
+    } finally {
+        isProcessing.value = false;
+    }
 };
 
 
-
+// --- FUNCIÓN CARGAR HISTORIAL (8081) - SIN CAMBIOS EN ENDPOINT ---
 const cargarHistorial = async () => {
-    const url = `${BASE_URL}/historial/${props.incidencia.id}`;
-    const estadoDiv = getMensajeEstadoDiv();
-    if (estadoDiv) estadoDiv.textContent = "🔍 Cargando historial...";
-    const getNamesFromIds = (idString) => {
-        if (!idString) return [];
-        const ids = idString.toString().split(',').map(s => parseInt(s.trim()));
-        return ids.map(id => {
-            const user = mapaUsuarios.find(u => u.id === id);
-            return user ? user.nombre : `ID ${id}`;
-        });
-    };
-    
-    try {
-        const respuesta = await axios.get(url);
-        historialGestion.value = respuesta.data.map(item => ({
-            idGestion: item.id, 
-            fecha: formatFechaInput(item.fecha_registro),
-            usuario: item.nombreUsuario || 'S/I',
-            tipo: item.tipo,
-            descripcion: item.descripcion,
-            nuevoEstado: item.nuevo_estado,
-            tiempoInvertido: item.tiempo_invertido, 
-            adjuntoRuta: item.adjunto_ruta,
-            fechaCompromiso: item.fecha_compromiso, 
-            involucrados: getNamesFromIds(item.involucrados), 
-            titulo: item.nuevo_estado ? `Cambio a ${item.nuevo_estado}` : item.tipo,
-        }));
-        
-        if (estadoDiv) estadoDiv.textContent = `✅ Historial actualizado: ${historialGestion.value.length} entradas.`;
+    // Usa la ruta relativa API_BASE_PATH
+    const url = `${API_BASE_PATH}/historial/${props.incidencia.id}`;
+    const estadoDiv = getMensajeEstadoDiv();
+    if (estadoDiv) estadoDiv.textContent = "🔍 Cargando historial...";
+    const getNamesFromIds = (idString) => {
+        if (!idString) return [];
+        const ids = idString.toString().split(',').map(s => parseInt(s.trim()));
+        return ids.map(id => {
+            const user = mapaUsuarios.find(u => u.id === id);
+            return user ? user.nombre : `ID ${id}`;
+        });
+    };
+    
+    try {
+        const respuesta = await axios.get(url);
+        historialGestion.value = respuesta.data.map(item => ({
+            idGestion: item.id, 
+            fecha: formatFechaInput(item.fecha_registro),
+            usuario: item.nombreUsuario || 'S/I',
+            tipo: item.tipo,
+            descripcion: item.descripcion,
+            nuevoEstado: item.nuevo_estado,
+            tiempoInvertido: item.tiempo_invertido, 
+            adjuntoRuta: item.adjunto_ruta,
+            fechaCompromiso: item.fecha_compromiso, 
+            involucrados: getNamesFromIds(item.involucrados), 
+            titulo: item.nuevo_estado ? `Cambio a ${item.nuevo_estado}` : item.tipo,
+        }));
+        
+        if (estadoDiv) estadoDiv.textContent = `✅ Historial actualizado: ${historialGestion.value.length} entradas.`;
 
-    } catch (error) {
-        console.error("Error al obtener el historial:", error);
-        if (estadoDiv) estadoDiv.textContent = "❌ Error al cargar el historial. Revise la consola.";
-        historialGestion.value = [];
-    }
+    } catch (error) {
+        console.error("Error al obtener el historial:", error);
+        if (estadoDiv) estadoDiv.textContent = "❌ Error al cargar el historial. Revise la consola.";
+        historialGestion.value = [];
+    }
 };
 
 const registrarGestionCompleto = async () => {
-    if (!newSeguimiento.value.descripcion) {
-        alert("La nota de seguimiento es obligatoria para registrar una actividad.");
-        return;
-    }
-    const involucradosIDs = newSeguimiento.value.responsablesInvolucrados
-        .map(nombre => {
-            const user = mapaUsuarios.find(u => u.nombre === nombre);
-            return user ? user.id : null; 
-        })
-        .filter(id => id !== null) 
-        .join(','); 
-    const datosParaAPI = {
-        "idIncidencia": props.incidencia.id,
-        "idUsuario": ID_USUARIO_ACTUAL, 
-        "tipo": newSeguimiento.value.tipo, 
-        "descripcion": newSeguimiento.value.descripcion, 
-        "nuevoEstado": newSeguimiento.value.nuevoEstado, 
-        "tiempoInvertido": newSeguimiento.value.tiempoInvertido || "0h 0m",
-        "adjuntoRuta": newSeguimiento.value.nombreAdjunto, 
-        "fechaCompromiso": newSeguimiento.value.fechaCompromiso || null,
-        "involucrados": involucradosIDs || null, 
-    };
-    const postExitoso = await ejecutarPost(datosParaAPI);
+    if (!newSeguimiento.value.descripcion) {
+        alert("La nota de seguimiento es obligatoria para registrar una actividad.");
+        return;
+    }
+    const involucradosIDs = newSeguimiento.value.responsablesInvolucrados
+        .map(nombre => {
+            const user = mapaUsuarios.find(u => u.nombre === nombre);
+            return user ? user.id : null; 
+        })
+        .filter(id => id !== null) 
+        .join(','); 
+    const datosParaAPI = {
+        "idIncidencia": props.incidencia.id,
+        "idUsuario": ID_USUARIO_ACTUAL, 
+        "tipo": newSeguimiento.value.tipo, 
+        "descripcion": newSeguimiento.value.descripcion, 
+        "nuevoEstado": newSeguimiento.value.nuevoEstado, 
+        "tiempoInvertido": newSeguimiento.value.tiempoInvertido || "0h 0m",
+        "adjuntoRuta": newSeguimiento.value.nombreAdjunto, 
+        "fechaCompromiso": newSeguimiento.value.fechaCompromiso || null,
+        "involucrados": involucradosIDs || null, 
+    };
+    const postExitoso = await ejecutarPost(datosParaAPI);
 
-    if (postExitoso) {
-        await cargarHistorial();
-        props.incidencia.estado.tipo = datosParaAPI.nuevoEstado;
-        if (datosParaAPI.fechaCompromiso) {
-            props.incidencia.fechaSLA = datosParaAPI.fechaCompromiso;
-        }
-        newSeguimiento.value.descripcion = "";
-        newSeguimiento.value.fecha = new Date().toISOString().substring(0, 16);
-        newSeguimiento.value.nuevoEstado = props.incidencia.estado.tipo;
-        newSeguimiento.value.responsablesInvolucrados = [];
-        newSeguimiento.value.nombreAdjunto = null; 
-        newSeguimiento.value.tiempoInvertido = ""; 
-        newSeguimiento.value.fechaCompromiso = ""; 
-        newSeguimiento.value.tipo = "Nota"; 
-        selectedResponsable.value = ""; 
-        const fileInput = document.getElementById('adjuntoSeguimiento');
-        if (fileInput) fileInput.value = '';
-    }
+    if (postExitoso) {
+        await cargarHistorial();
+        props.incidencia.estado.tipo = datosParaAPI.nuevoEstado;
+        if (datosParaAPI.fechaCompromiso) {
+            props.incidencia.fechaSLA = datosParaAPI.fechaCompromiso;
+        }
+        newSeguimiento.value.descripcion = "";
+        newSeguimiento.value.fecha = new Date().toISOString().substring(0, 16);
+        newSeguimiento.value.nuevoEstado = props.incidencia.estado.tipo;
+        newSeguimiento.value.responsablesInvolucrados = [];
+        newSeguimiento.value.nombreAdjunto = null; 
+        newSeguimiento.value.tiempoInvertido = ""; 
+        newSeguimiento.value.fechaCompromiso = ""; 
+        newSeguimiento.value.tipo = "Nota"; 
+        selectedResponsable.value = ""; 
+        const fileInput = document.getElementById('adjuntoSeguimiento');
+        if (fileInput) fileInput.value = '';
+    }
 };
 
 const resolverIncidencia = async () => {
-    const estadoActual = props.incidencia.estado.tipo;
-    if (estadoActual === 'En Proceso' || estadoActual === 'Pendiente de Usuario') {
-        const confirmacion = confirm(`¿Estás seguro de que deseas cambiar el estado a "Resuelta (Verificación)"?`);
-        if (confirmacion) {
-            const datosParaAPI = {
-                "idIncidencia": props.incidencia.id,
-                "idUsuario": ID_USUARIO_ACTUAL,
-                "tipo": "Estado", 
-                "descripcion": `Incidencia marcada como resuelta para verificación. Acción rápida.`,
-                "nuevoEstado": 'Resuelta (Verificación)',
-                "tiempoInvertido": "0h 0m",
-                "adjuntoRuta": null, 
-                "fechaCompromiso": null,
-                "involucrados": null,
-            };
+    const estadoActual = props.incidencia.estado.tipo;
+    if (estadoActual === 'En Proceso' || estadoActual === 'Pendiente de Usuario') {
+        const confirmacion = confirm(`¿Estás seguro de que deseas cambiar el estado a "Resuelta (Verificación)"?`);
+        if (confirmacion) {
+            const datosParaAPI = {
+                "idIncidencia": props.incidencia.id,
+                "idUsuario": ID_USUARIO_ACTUAL,
+                "tipo": "Estado", 
+                "descripcion": `Incidencia marcada como resuelta para verificación. Acción rápida.`,
+                "nuevoEstado": 'Resuelta (Verificación)',
+                "tiempoInvertido": "0h 0m",
+                "adjuntoRuta": null, 
+                "fechaCompromiso": null,
+                "involucrados": null,
+            };
 
-            const postExitoso = await ejecutarPost(datosParaAPI);
+            const postExitoso = await ejecutarPost(datosParaAPI);
 
-            if (postExitoso) {
-                props.incidencia.estado.tipo = 'Resuelta (Verificación)';
-                await cargarHistorial();
-                mostrarMensajeExito("Incidencia marcada como Resuelta para verificación. ✨");
-            }
-        }
-    } else {
-        alert("La incidencia debe estar en estado 'En Proceso' o 'Pendiente de Usuario' para usar esta acción rápida.");
-    }
+            if (postExitoso) {
+                props.incidencia.estado.tipo = 'Resuelta (Verificación)';
+                await cargarHistorial();
+                mostrarMensajeExito("Incidencia marcada como Resuelta para verificación. ✨");
+            }
+        }
+    } else {
+        alert("La incidencia debe estar en estado 'En Proceso' o 'Pendiente de Usuario' para usar esta acción rápida.");
+    }
 };
 
 const addResponsable = () => {
     if (selectedResponsable.value && !newSeguimiento.value.responsablesInvolucrados.includes(selectedResponsable.value)) {
         newSeguimiento.value.responsablesInvolucrados.push(selectedResponsable.value);
-        selectedResponsable.value = ""; 
+        selectedResponsable.value = ""; 
     }
 };
 const removeResponsable = (responsable) => {
@@ -583,97 +588,105 @@ const handleFileUpload = (event) => {
 
 
 
+// --- FUNCIÓN NOTIFICAR USUARIO (MODIFICADA) ---
 const notificarUsuario = async () => {
-    const getEmailForUser = (nombre) => {
-        const domain = "@magriturismo.com";
-        if (nombre === "Administrador") {
-            return "kevin.agrada" + domain; 
-        }
-        const emailPrefix = nombre
-            .toLowerCase()
-            .trim()
-            .replace(/ /g, '.')
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, ""); 
+    const getEmailForUser = (nombre) => {
+        const domain = "@magriturismo.com";
+        if (nombre === "Administrador") {
+            return "kevin.agrada" + domain; 
+        }
+        const emailPrefix = nombre
+            .toLowerCase()
+            .trim()
+            .replace(/ /g, '.')
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, ""); 
 
-        if (!emailPrefix) return null;
-        return emailPrefix + domain;
-    };
-    if (!newSeguimiento.value.descripcion) {
-        alert("❌ Debes escribir una nota de seguimiento para notificar al usuario.");
-        return;
-    }
-    const NOTIFIER_URL = "http://localhost:3000/api/notificar-seguimiento"; 
-    const ultimaNota = {
-        time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-        user: mapaUsuarios.find(u => u.id === ID_USUARIO_ACTUAL)?.nombre || 'Sistema',
-        comment: newSeguimiento.value.descripcion
-    };
-    const todosLosInvolucrados = [];
-    const emailsProcesados = new Set();
-    if (props.incidencia.usuario && props.incidencia.usuario.nombre) {
-        const nombreReportante = props.incidencia.usuario.nombre;
-        const email = getEmailForUser(nombreReportante);
-        
-        if (email && !emailsProcesados.has(email)) {
-             todosLosInvolucrados.push({ 
-                name: nombreReportante, 
-                role: 'Reportante', 
-                email: email
-            });
-            emailsProcesados.add(email);
-        }
-    }
-    newSeguimiento.value.responsablesInvolucrados.forEach(nombreCC => {
-        const user = mapaUsuarios.find(u => u.nombre === nombreCC);
-        if (user) {
-            const email = getEmailForUser(user.nombre);
-            
-            if (email && !emailsProcesados.has(email)) {
-                todosLosInvolucrados.push({ 
-                    name: user.nombre, 
-                    role: 'Técnico/CC', 
-                    email: email 
-                });
-                emailsProcesados.add(email);
-            }
-        }
-    });
-    if (props.incidencia.usuarioAsignado && props.incidencia.usuarioAsignado.nombre) {
-        const nombreAsignado = props.incidencia.usuarioAsignado.nombre;
-        const email = getEmailForUser(nombreAsignado);
+        if (!emailPrefix) return null;
+        return emailPrefix + domain;
+    };
+    if (!newSeguimiento.value.descripcion) {
+        alert("❌ Debes escribir una nota de seguimiento para notificar al usuario.");
+        return;
+    }
+    
+    // NOTIFIER_URL ahora es http://192.168.1.116:3000/api/notificar-seguimiento
+    
+    const ultimaNota = {
+        time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+        user: mapaUsuarios.find(u => u.id === ID_USUARIO_ACTUAL)?.nombre || 'Sistema',
+        comment: newSeguimiento.value.descripcion
+    };
+    const todosLosInvolucrados = [];
+    const emailsProcesados = new Set();
+    if (props.incidencia.usuario && props.incidencia.usuario.nombre) {
+        const nombreReportante = props.incidencia.usuario.nombre;
+        const email = getEmailForUser(nombreReportante);
+        
+        if (email && !emailsProcesados.has(email)) {
+             todosLosInvolucrados.push({ 
+                name: nombreReportante, 
+                role: 'Reportante', 
+                email: email
+            });
+            emailsProcesados.add(email);
+        }
+    }
+    newSeguimiento.value.responsablesInvolucrados.forEach(nombreCC => {
+        const user = mapaUsuarios.find(u => u.nombre === nombreCC);
+        if (user) {
+            const email = getEmailForUser(user.nombre);
+            
+            if (email && !emailsProcesados.has(email)) {
+                todosLosInvolucrados.push({ 
+                    name: user.nombre, 
+                    role: 'Técnico/CC', 
+                    email: email 
+                });
+                emailsProcesados.add(email);
+            }
+        }
+    });
+    if (props.incidencia.usuarioAsignado && props.incidencia.usuarioAsignado.nombre) {
+        const nombreAsignado = props.incidencia.usuarioAsignado.nombre;
+        const email = getEmailForUser(nombreAsignado);
 
-        if (email && !emailsProcesados.has(email)) {
-             todosLosInvolucrados.push({ 
-                name: nombreAsignado, 
-                role: 'Asignado', 
-                email: email 
-            });
-            emailsProcesados.add(email);
-        }
-    }
-    const datosParaSeguimiento = {
-        incidentId: props.incidencia.codigoReferencia,
-        status: newSeguimiento.value.nuevoEstado,
-        priority: props.incidencia.prioridad ? props.incidencia.prioridad.nombre : "S/I",
-        assignedTo: props.incidencia.usuarioAsignado ? props.incidencia.usuarioAsignado.nombre : 'Sin Asignar',
-        updateTime: ultimaNota.time + " - " + new Date().toLocaleDateString('es-ES'), 
-        linkToTicket: `https://magriturismo.com/incidencias/${props.incidencia.id}`, 
-        involvedParties: todosLosInvolucrados,
-        history: [ultimaNota] 
-    };
-    if (datosParaSeguimiento.involvedParties.length === 0) {
-        alert("❌ Error: No se pudo generar o encontrar ningún email de destinatario válido.");
-        return;
-    }
-    try {
-        console.log('Enviando datos de seguimiento a Node:', datosParaSeguimiento);
-        const response = await axios.post(NOTIFIER_URL, datosParaSeguimiento);
-        alert(`✅ Notificación de seguimiento enviada con éxito: ${response.data.message}`);
-    } catch (error) {
-        console.error("Error al notificar seguimiento vía Node:", error);
-        alert(`❌ Error al enviar la notificación de seguimiento. Revise la consola y el servidor Node.`);
-    }
+        if (email && !emailsProcesados.has(email)) {
+             todosLosInvolucrados.push({ 
+                name: nombreAsignado, 
+                role: 'Asignado', 
+                email: email 
+            });
+            emailsProcesados.add(email);
+        }
+    }
+    const datosParaSeguimiento = {
+        incidentId: props.incidencia.codigoReferencia,
+        status: newSeguimiento.value.nuevoEstado,
+        priority: props.incidencia.prioridad ? props.incidencia.prioridad.nombre : "S/I",
+        assignedTo: props.incidencia.usuarioAsignado ? props.incidencia.usuarioAsignado.nombre : 'Sin Asignar',
+        updateTime: ultimaNota.time + " - " + new Date().toLocaleDateString('es-ES'), 
+        
+        // CAMBIO CRÍTICO 2: Corregido el enlace a la IP real para despliegue
+        linkToTicket: `http://192.168.1.116:8081/incidencias/${props.incidencia.id}`, 
+        
+        involvedParties: todosLosInvolucrados,
+        history: [ultimaNota] 
+    };
+    if (datosParaSeguimiento.involvedParties.length === 0) {
+        alert("❌ Error: No se pudo generar o encontrar ningún email de destinatario válido.");
+        return;
+    }
+    try {
+        console.log('Enviando datos de seguimiento a Node:', datosParaSeguimiento);
+        // Usamos la URL actualizada (192.168.1.116:3000)
+        const response = await axios.post(NOTIFIER_URL, datosParaSeguimiento);
+        alert(`✅ Notificación de seguimiento enviada con éxito: ${response.data.message}`);
+    } catch (error) {
+        console.error("Error al notificar seguimiento vía Node:", error);
+        // CAMBIO CRÍTICO 3: Actualizado mensaje de error a la IP real para despliegue
+        alert(`❌ Error al enviar la notificación de seguimiento. Revise la consola y el servidor Node. Asegúrese que el servicio de Node esté corriendo en http://192.168.1.116:3000.`);
+    }
 };
 
 
@@ -724,13 +737,15 @@ const slaClass = (fechaSLA) => {
 
     if (days < 0) return 'sla-overdue';
     if (days < 1) return 'sla-warning';
-    return 'sla-ok'; 
+    return 'sla-ok'; 
 };
 
+// --- FUNCIÓN ASIGNAR (8081) - SIN CAMBIOS EN ENDPOINT ---
 const asignar = async (id) => {
     try {
-        const url = `http://localhost:8081/api/incidencias/detalle?id=${id}`; 
-        const resp = await axios.get(url); 
+        // Usa la ruta relativa /api/incidencias/detalle?id=...
+        const url = `/api/incidencias/detalle?id=${id}`; 
+        const resp = await axios.get(url); 
         incidenciaAsignacion.value = resp.data;
         mostrarAsignarModal.value = true;
     } catch (err) {
@@ -752,17 +767,16 @@ const mostrarMensajeExito = (mensaje) => {
 };
 
 onMounted(() => {
-    cargarHistorial();
+    cargarHistorial();
 });
 
 watch(activeTab, (newTab) => {
-    if (newTab === 'seguimiento') {
-        cargarHistorial();
-    }
+    if (newTab === 'seguimiento') {
+        cargarHistorial();
+    }
 });
 
 </script>
-
 <style scoped>
 .modal-header h2 {
     padding: 0;

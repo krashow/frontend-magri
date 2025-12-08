@@ -139,54 +139,60 @@ const userName = "Administrador";
 const usuarios = ref([]);
 const rolesDisponibles = ref(['ADMIN', 'SOPORTE', 'USUARIO']); 
 
+// --- DEFINICIÓN DE RUTA BASE RELATIVA ---
+const API_BASE_PATH = "/api/usuarios";
+
+
 onMounted(() => {
-    cargarUsuarios();
+    cargarUsuarios();
 });
 
 
+// --- FUNCIÓN CORREGIDA: CARGAR USUARIOS ---
 const cargarUsuarios = async () => {
-    try {
-        const resp = await axios.get("http://localhost:8081/api/usuarios/responsables");
+    try {
+        // Usa la ruta relativa /api/usuarios/responsables
+        const resp = await axios.get(`${API_BASE_PATH}/responsables`);
 
-        console.log("Datos recibidos del backend. Verifica los nombres de las propiedades:", resp.data);
+        console.log("Datos recibidos del backend. Verifica los nombres de las propiedades:", resp.data);
 
-        usuarios.value = resp.data.map(user => ({
-            ...user,
-            id_user: user.id_user || user.id, 
-            n_user: user.n_user || user.nombre || 'N/D', 
-            rol: user.id_user === 1 ? 'ADMIN' : (user.id_user === 2 ? 'SOPORTE' : 'USUARIO') 
-        }));
+        usuarios.value = resp.data.map(user => ({
+            ...user,
+            id_user: user.id_user || user.id, 
+            n_user: user.n_user || user.nombre || 'N/D', 
+            rol: user.id_user === 1 ? 'ADMIN' : (user.id_user === 2 ? 'SOPORTE' : 'USUARIO') 
+        }));
 
-    } catch (err) {
-        console.error("Error al cargar responsables:", err);
-        alert("❌ No se pudo cargar la lista de responsables.");
-    }
+    } catch (err) {
+        console.error("Error al cargar responsables:", err);
+        alert("❌ No se pudo cargar la lista de responsables.");
+    }
 };
 
 const simularActualizarRol = (idUsuario, nombreUsuario, nuevoRol) => {
-    alert(`El rol del responsable "${nombreUsuario}" (ID: #${idUsuario}) se cambiaría a: ${nuevoRol}.`);
-    
-    const index = usuarios.value.findIndex(u => u.id_user === idUsuario);
-    if (index !== -1) {
-        usuarios.value[index].rol = nuevoRol;
-    }
+    alert(`El rol del responsable "${nombreUsuario}" (ID: #${idUsuario}) se cambiaría a: ${nuevoRol}.`);
+    
+    const index = usuarios.value.findIndex(u => u.id_user === idUsuario);
+    if (index !== -1) {
+        usuarios.value[index].rol = nuevoRol;
+    }
 };
 
 const simularEliminar = (id, nombre) => {
-    if (window.confirm(`¿Estás seguro de la eliminación de "${nombre}" (ID: #${id})?`)) {
-        alert(`El usuario #${id} se eliminaría del sistema.`);
-        usuarios.value = usuarios.value.filter(u => u.id_user !== id);
-    }
+    if (window.confirm(`¿Estás seguro de la eliminación de "${nombre}" (ID: #${id})?`)) {
+        alert(`El usuario #${id} se eliminaría del sistema.`);
+        usuarios.value = usuarios.value.filter(u => u.id_user !== id);
+    }
 };
 const logout = () => {
-  if (window.confirm("¿Seguro que deseas cerrar sesión?")) {
-    localStorage.removeItem("token");
-    router.push("/login");
-  }
+  if (window.confirm("¿Seguro que deseas cerrar sesión?")) {
+    localStorage.removeItem("token");
+    router.push("/login");
+  }
 };
 
 const navigateTo = (path) => {
-  router.push(path);
+  router.push(path);
 };
 </script>
 

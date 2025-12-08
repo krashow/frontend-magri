@@ -141,13 +141,13 @@
     @editar="iniciarEdicionModal"
   />
 </template>
-
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
 import "./Dashboard.css";
-import DetalleModal from "/src/views/DetalleModal.vue";
+import DetalleModal from "/src/views/DetalleModal.vue"; 
+const API_BASE_PATH = "/api/incidencias";
 
 const router = useRouter();
 const route = useRoute();
@@ -160,168 +160,181 @@ const mostrarModal = ref(false);
 const mostrarAsignarModal = ref(false);
 
 onMounted(() => {
-  cargarIncidencias();
+  cargarIncidencias();
 });
 
 const handleDetalleModalClose = () => {
-  mostrarModal.value = false;
-  cargarIncidencias();
+  mostrarModal.value = false;
+  cargarIncidencias();
 };
 
+// --- FUNCIÓN CORREGIDA: CARGAR INCIDENCIAS ---
 const cargarIncidencias = async () => {
-  try {
-    const resp = await axios.get("http://localhost:8081/api/incidencias");
-    incidencias.value = resp.data;
-    console.log("Datos de incidencias:", resp.data);
-  } catch (err) {
-    console.error("Error al cargar incidencias:", err);
-    alert("❌ No se pudieron cargar las incidencias.");
-  }
+  try {
+    // Usa la ruta relativa /api/incidencias
+    const resp = await axios.get(API_BASE_PATH);
+    incidencias.value = resp.data;
+    console.log("Datos de incidencias:", resp.data);
+  } catch (err) {
+    console.error("Error al cargar incidencias:", err);
+    alert("❌ No se pudieron cargar las incidencias.");
+  }
 };
 
+// ... (Resto de funciones de ordenación (getPrioridadOrder, incidenciasOrdenadas) se mantienen igual)
 const getPrioridadOrder = (prioridadNombre) => {
-  const order = {
-    "Crítica": 1,
-    "Alta": 2,
-    "Media": 3,
-    "Baja": 4,
-    "S/I": 5,
-  };
-  return order[prioridadNombre] || 99;
+  const order = {
+    "Crítica": 1,
+    "Alta": 2,
+    "Media": 3,
+    "Baja": 4,
+    "S/I": 5,
+  };
+  return order[prioridadNombre] || 99;
 };
 
 const incidenciasOrdenadas = computed(() => {
-  return [...incidencias.value].sort((a, b) => {
-    const prioA = a.prioridad ? a.prioridad.nombre : "S/I";
-    const prioB = b.prioridad ? b.prioridad.nombre : "S/I";
+  return [...incidencias.value].sort((a, b) => {
+    const prioA = a.prioridad ? a.prioridad.nombre : "S/I";
+    const prioB = b.prioridad ? b.prioridad.nombre : "S/I";
 
-    const orderA = getPrioridadOrder(prioA);
-    const orderB = getPrioridadOrder(prioB);
-    return orderA - orderB;
-  });
+    const orderA = getPrioridadOrder(prioA);
+    const orderB = getPrioridadOrder(prioB);
+    return orderA - orderB;
+  });
 });
 
+// --- FUNCIÓN CORREGIDA: VER DETALLE (MODAL) ---
 const verDetalle = async (id) => {
-  try {
-    const url = `http://localhost:8081/api/incidencias/detalle?id=${id}`;
+  try {
+    // Usa la ruta relativa con el ID de la incidencia
+    const url = `${API_BASE_PATH}/detalle?id=${id}`;
 
-    const resp = await axios.get(url);
+    const resp = await axios.get(url);
 
-    incidenciaSeleccionada.value = resp.data;
-    mostrarModal.value = true;
-  } catch (err) {
-    console.error("Error al cargar detalle para el modal:", err);
-    alert("❌ No se pudo cargar el detalle de la incidencia.");
-  }
+    incidenciaSeleccionada.value = resp.data;
+    mostrarModal.value = true;
+  } catch (err) {
+    console.error("Error al cargar detalle para el modal:", err);
+    alert("❌ No se pudo cargar el detalle de la incidencia.");
+  }
 };
 
 const iniciarEdicionModal = (id) => {
-  mostrarModal.value = false;
-  alert(`Redirigiendo a la edición de la incidencia #${id}`);
-  router.push(`/incidencias/editar/${id}`);
+  mostrarModal.value = false;
+  alert(`Redirigiendo a la edición de la incidencia #${id}`);
+  router.push(`/incidencias/editar/${id}`);
 };
 
+// --- FUNCIÓN CORREGIDA: ASIGNAR (MODAL) ---
 const asignar = async (id) => {
-  try {
-    const url = `http://localhost:8081/api/incidencias/detalle?id=${id}`;
-    const resp = await axios.get(url);
-    incidenciaSeleccionada.value = resp.data;
-    mostrarAsignarModal.value = true;
-  } catch (err) {
-    console.error("Error al cargar detalle para asignar:", err);
-    alert(
-      "❌ No se pudo cargar el detalle de la incidencia para la asignación."
-    );
-  }
+  try {
+    // Usa la ruta relativa para obtener el detalle de la incidencia
+    const url = `${API_BASE_PATH}/detalle?id=${id}`;
+    const resp = await axios.get(url);
+    incidenciaSeleccionada.value = resp.data;
+    mostrarAsignarModal.value = true;
+  } catch (err) {
+    console.error("Error al cargar detalle para asignar:", err);
+    alert(
+      "❌ No se pudo cargar el detalle de la incidencia para la asignación."
+    );
+  }
 };
+
 const cerrarAsignarModal = () => {
-  mostrarAsignarModal.value = false;
+  mostrarAsignarModal.value = false;
 };
 const incidenciaAsignadaHandler = (incidenciaActualizada) => {
-  cerrarAsignarModal();
-  cargarIncidencias();
+  cerrarAsignarModal();
+  cargarIncidencias();
 };
 
 const modificar = (id) => {
-  alert(`Modificar la incidencia #${id}`);
+  alert(`Modificar la incidencia #${id}`);
 };
 const mostrarMensajeExito = (mensaje) => {
-  alert("✅ " + mensaje);
+  alert("✅ " + mensaje);
 };
 const confirmarEliminar = (id) => {
-  if (
-    window.confirm(
-      `¿Estás seguro de que deseas eliminar la incidencia #${id}? Esta acción no se puede deshacer.`
-    )
-  ) {
-    eliminarIncidencia(id);
-  }
+  if (
+    window.confirm(
+      `¿Estás seguro de que deseas eliminar la incidencia #${id}? Esta acción no se puede deshacer.`
+    )
+  ) {
+    eliminarIncidencia(id);
+  }
 };
 
+// --- FUNCIÓN CORREGIDA: ELIMINAR INCIDENCIA ---
 const eliminarIncidencia = async (id) => {
-  try {
-    await axios.delete(`http://localhost:8081/api/incidencias/${id}`);
+  try {
+    // Usa la ruta relativa /api/incidencias/{id}
+    await axios.delete(`${API_BASE_PATH}/${id}`);
 
-    alert(`✅ Incidencia #${id} eliminada con éxito.`);
-    cargarIncidencias();
-  } catch (err) {
-    console.error("Error al eliminar incidencia:", err);
-    alert("❌ Error al eliminar la incidencia. Revise la consola del backend.");
-  }
+    alert(`✅ Incidencia #${id} eliminada con éxito.`);
+    cargarIncidencias();
+  } catch (err) {
+    console.error("Error al eliminar incidencia:", err);
+    alert("❌ Error al eliminar la incidencia. Revise la consola del backend.");
+  }
 };
+
+// ... (Resto de funciones de formato y clase se mantienen igual)
+
 const formatFecha = (dateTimeStr) => {
-  if (!dateTimeStr) return "N/A";
-  const date = new Date(dateTimeStr);
-  return date.toLocaleDateString("es-ES", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  if (!dateTimeStr) return "N/A";
+  const date = new Date(dateTimeStr);
+  return date.toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 const truncateText = (text, maxLength = 30) => {
-  if (!text) return "Sin descripción";
-  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+  if (!text) return "Sin descripción";
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
 };
 
 const estadoClass = (estadoTipo) => {
-  switch (estadoTipo) {
-    case "Abierta":
-      return "status-open";
-    case "En Proceso":
-      return "status-in-progress";
-    case "Cerrada":
-      return "status-closed";
-    default:
-      return "status-default";
-  }
+  switch (estadoTipo) {
+    case "Abierta":
+      return "status-open";
+    case "En Proceso":
+      return "status-in-progress";
+    case "Cerrada":
+      return "status-closed";
+    default:
+      return "status-default";
+  }
 };
 
 const prioridadClass = (prioridadTipo) => {
-  switch (prioridadTipo) {
-    case "Crítica":
-      return "prio-critica";
-    case "Alta":
-      return "prio-alta";
-    case "Media":
-      return "prio-media";
-    case "Baja":
-      return "prio-baja";
-    default:
-      return "prio-default";
-  }
+  switch (prioridadTipo) {
+    case "Crítica":
+      return "prio-critica";
+    case "Alta":
+      return "prio-alta";
+    case "Media":
+      return "prio-media";
+    case "Baja":
+      return "prio-baja";
+    default:
+      return "prio-default";
+  }
 };
 
 const logout = () => {
-  if (window.confirm("¿Seguro que deseas cerrar sesión?")) {
-    router.push("/login");
-  }
+  if (window.confirm("¿Seguro que deseas cerrar sesión?")) {
+    router.push("/login");
+  }
 };
 
 const navigateTo = (path) => {
-  router.push(path);
+  router.push(path);
 };
 </script>
 <style scoped src="./Dashboard.css"></style>

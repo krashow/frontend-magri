@@ -167,111 +167,119 @@ const route = useRoute();
 const currentRoute = route.path;
 
 const userName = ref("Administrador");
+
 const logout = () => {
-  if (window.confirm("¿Seguro que deseas cerrar sesión?")) {
-    localStorage.removeItem("token");
-    router.push("/login");
-  }
+  if (window.confirm("¿Seguro que deseas cerrar sesión?")) {
+    localStorage.removeItem("token");
+    router.push("/login");
+  }
 };
 
 const navigateTo = (path) => {
-  router.push(path);
+  router.push(path);
 };
+
 const responsableId = ref(1);
 const incidencias = ref([]);
 const isLoading = ref(false);
 const errorMessage = ref("");
 
-const API_BASE_URL =
-  "http://localhost:8081/api/incidencias/responsable/asignadas";
+// CAMBIO CRÍTICO: RUTA BASE COMPLETA para Despliegue en otra PC (192.168.1.116:8081)
+const API_BASE_PATH = "http://192.168.1.116:8081/api/incidencias/responsable/asignadas";
 
+// --- FUNCIÓN CORREGIDA: CARGAR INCIDENCIAS ---
 const cargarIncidencias = async () => {
-  errorMessage.value = "";
-  incidencias.value = [];
-  isLoading.value = true;
+  errorMessage.value = "";
+  incidencias.value = [];
+  isLoading.value = true;
 
-  if (responsableId.value <= 0) {
-    errorMessage.value = "Por favor, ingresa un ID de Responsable válido.";
-    isLoading.value = false;
-    return;
-  }
+  if (responsableId.value <= 0) {
+    errorMessage.value = "Por favor, ingresa un ID de Responsable válido.";
+    isLoading.value = false;
+    return;
+  }
 
-  try {
-    const url = `${API_BASE_URL}?idResponsable=${responsableId.value}`;
-    const response = await axios.get(url);
-    const dataConTipoEstado = response.data.map((inc) => ({
-      ...inc,
-      estado: {
-        tipo: inc.estado?.nombre || "Abierto",
-        nombre: inc.estado?.nombre,
-      },
-    }));
+  try {
+    // Usa la ruta COMPLETA y el parámetro de búsqueda
+    const url = `${API_BASE_PATH}?idResponsable=${responsableId.value}`;
+    const response = await axios.get(url);
+    
+    // Tu lógica de mapeo de estado se mantiene igual
+    const dataConTipoEstado = response.data.map((inc) => ({
+      ...inc,
+      estado: {
+        tipo: inc.estado?.nombre || "Abierto",
+        nombre: inc.estado?.nombre,
+      },
+    }));
 
-    incidencias.value = dataConTipoEstado;
-  } catch (error) {
-    console.error("Error al cargar las incidencias:", error);
+    incidencias.value = dataConTipoEstado;
+  } catch (error) {
+    console.error("Error al cargar las incidencias:", error);
 
-    if (error.response && error.response.status === 404) {
-      errorMessage.value = `El Responsable con ID ${responsableId.value} no fue encontrado.`;
-    } else {
-      errorMessage.value =
-        "Error de conexión con el backend. Verifica que Spring Boot esté corriendo.";
-    }
-  } finally {
-    isLoading.value = false;
-  }
+    if (error.response && error.response.status === 404) {
+      errorMessage.value = `El Responsable con ID ${responsableId.value} no fue encontrado.`;
+    } else {
+      errorMessage.value =
+        "Error de conexión con el backend. Verifica que Spring Boot esté corriendo y el Firewall esté abierto en el puerto 8081.";
+    }
+  } finally {
+    isLoading.value = false;
+  }
 };
 
+// ... (Resto de funciones de formato y clases se mantienen igual)
 const formatDate = (dateString) => {
-  if (!dateString) return "N/A";
-  try {
-    return new Date(dateString).toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return dateString;
-  }
+  if (!dateString) return "N/A";
+  try {
+    return new Date(dateString).toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return dateString;
+  }
 };
 
 const getEstadoClass = (estadoNombre) => {
-  const lowerCaseName = estadoNombre ? estadoNombre.toLowerCase() : "";
+  const lowerCaseName = estadoNombre ? estadoNombre.toLowerCase() : "";
 
-  if (
-    lowerCaseName.includes("abierto") ||
-    lowerCaseName.includes("pendiente")
-  ) {
-    return "estado-rojo";
-  }
-  if (
-    lowerCaseName.includes("progreso") ||
-    lowerCaseName.includes("asignado")
-  ) {
-    return "estado-amarillo";
-  }
-  if (lowerCaseName.includes("cerrado") || lowerCaseName.includes("resuelto")) {
-    return "estado-verde";
-  }
-  return "estado-gris";
+  if (
+    lowerCaseName.includes("abierto") ||
+    lowerCaseName.includes("pendiente")
+  ) {
+    return "estado-rojo";
+  }
+  if (
+    lowerCaseName.includes("progreso") ||
+    lowerCaseName.includes("asignado")
+  ) {
+    return "estado-amarillo";
+  }
+  if (lowerCaseName.includes("cerrado") || lowerCaseName.includes("resuelto")) {
+    return "estado-verde";
+  }
+  return "estado-gris";
 };
+
 const isModalOpen = ref(false);
 const selectedIncidencia = ref(null);
 
 const openDetalleModal = (incidencia) => {
-  selectedIncidencia.value = {
-    ...incidencia,
-    estado: {
-      tipo: incidencia.estado?.tipo || incidencia.estado?.nombre,
-      nombre: incidencia.estado?.nombre,
-    },
-  };
-  isModalOpen.value = true;
+  selectedIncidencia.value = {
+    ...incidencia,
+    estado: {
+      tipo: incidencia.estado?.tipo || incidencia.estado?.nombre,
+      nombre: incidencia.estado?.nombre,
+    },
+  };
+  isModalOpen.value = true;
 };
 
 const closeDetalleModal = () => {
-  isModalOpen.value = false;
-  selectedIncidencia.value = null;
+  isModalOpen.value = false;
+  selectedIncidencia.value = null;
 };
 </script>
 

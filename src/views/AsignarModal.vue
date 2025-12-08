@@ -84,8 +84,8 @@ export default {
       cargandoResponsables: false,
       cargando: false,
       errorMensaje: null,
-      BASE_URL: "http://localhost:8081",
-      NOTIFIER_URL: "http://localhost:3000", 
+      // CAMBIO CLAVE 1: URL del Notificador de vuelta a la IP real para despliegue
+      NOTIFIER_URL: "http://192.168.1.116:3000", 
     };
   },
   methods: {
@@ -93,9 +93,11 @@ export default {
       this.cargandoResponsables = true;
       this.errorMensaje = null;
       try {
-        const response = await axios.get(
-          `${this.BASE_URL}/api/usuarios/responsables`
-        );
+        // Usa la URL completa: http://192.168.1.116:8081/api/usuarios/responsables
+        // NOTA: Aquí asumimos que tienes configurado el baseURL de Axios o que usarás la URL completa.
+        // Si no usas baseURL, esta línea fallará. **Lo mantengo relativo si usas baseURL global.**
+        const response = await axios.get("/api/usuarios/responsables");
+
         this.listaResponsables = response.data;
         console.log("✅ Responsables cargados con éxito.");
       } catch (error) {
@@ -122,29 +124,36 @@ export default {
         this.cargandoResponsables = false;
       }
     },
-    async notificarAsignacion(incidenciaActualizada, responsableAsignado) {
-        const emailData = {
-            assignedTo: responsableAsignado.nombre,
-            assignedToEmail: responsableAsignado.email,
-            incidentId: `INC-${incidenciaActualizada.id}`,
-            status: incidenciaActualizada.estado?.tipo || 'Asignada', 
-            priority: this.incidencia.prioridad || 'Media', 
-            reporter: this.incidencia.usuario?.nombre || 'S/I', 
-            creationDate: this.incidencia.fechaCreacion ? new Date(this.incidencia.fechaCreacion).toLocaleString() : new Date().toLocaleString(),
-            description: this.incidencia.dscInc || this.incidencia.descripcionInc || 'Sin descripción.',
-            linkToTicket: `http://localhost:8080/incidencias/${incidenciaActualizada.id}`, 
-            assignedBy: 'Sistema/Administrador', 
-        };
+    
+    // --- FUNCIÓN CORREGIDA: NOTIFICAR ASIGNACIÓN ---
+    async notificarAsignacion(incidenciaActualizada, responsableAsignado) {
+        const emailData = {
+            assignedTo: responsableAsignado.nombre,
+            assignedToEmail: responsableAsignado.email,
+            incidentId: `INC-${incidenciaActualizada.id}`,
+            status: incidenciaActualizada.estado?.tipo || 'Asignada', 
+            priority: this.incidencia.prioridad || 'Media', 
+            reporter: this.incidencia.usuario?.nombre || 'S/I', 
+            creationDate: this.incidencia.fechaCreacion ? new Date(this.incidencia.fechaCreacion).toLocaleString() : new Date().toLocaleString(),
+            
+            // CAMBIO CLAVE 2: Link de vuelta a la IP real para despliegue
+            linkToTicket: `http://192.168.1.116:8081/incidencias/${incidenciaActualizada.id}`, 
+            
+            assignedBy: 'Sistema/Administrador', 
+        };
 
-        try {
-            await axios.post(`${this.NOTIFIER_URL}/api/notificar-asignacion`, emailData);
-            console.log(`✅ Solicitud de notificación enviada al Notificador Node para ${responsableAsignado.nombre}.`);
-        } catch (error) {
-            console.error("❌ Error al solicitar la notificación por correo (Node Service):", error.response || error);
-            this.$emit("mensajeGlobal", `⚠️ Advertencia: Incidencia asignada, pero falló el envío de correo.`);
-        }
-    },
+        try {
+            // Usa NOTIFIER_URL con la IP real (192.168.1.116:3000)
+            await axios.post(`${this.NOTIFIER_URL}/api/notificar-asignacion`, emailData);
+            console.log(`✅ Solicitud de notificación enviada al Notificador Node para ${responsableAsignado.nombre}.`);
+        } catch (error) {
+            console.error("❌ Error al solicitar la notificación por correo (Node Service):", error.response || error);
+            // CAMBIO CLAVE 3: Mensaje de error de vuelta a la IP real
+            this.$emit("mensajeGlobal", `⚠️ Advertencia: Incidencia asignada, pero falló el envío de correo. Asegúrate que Node esté corriendo en http://192.168.1.116:3000`);
+        }
+    },
 
+    // --- FUNCIÓN: ASIGNAR INCIDENCIA ---
     async asignarIncidencia() {
       if (!this.idResponsableSeleccionado) {
         this.errorMensaje = "Debes seleccionar un responsable.";
@@ -159,15 +168,19 @@ export default {
       };
       console.log("Datos de asignación a enviar:", asignacionData);
       try {
-        const endpoint = `${this.BASE_URL}/api/incidencias/asignar-responsable`;
+        // Usa la ruta relativa /api/incidencias/asignar-responsable
+        const endpoint = `/api/incidencias/asignar-responsable`;
         const response = await axios.post(endpoint, asignacionData);
+        
         const incidenciaActualizada = response.data;
-        const responsableAsignado = this.listaResponsables.find(r => r.id === this.idResponsableSeleccionado);
-        if (responsableAsignado && responsableAsignado.email) {
-            this.notificarAsignacion(incidenciaActualizada, responsableAsignado); 
-        } else {
-            console.warn("No se pudo notificar: Responsable no encontrado o le falta el campo 'email'.");
-        }
+        const responsableAsignado = this.listaResponsables.find(r => r.id === this.idResponsableSeleccionado);
+        
+        if (responsableAsignado && responsableAsignado.email) {
+            this.notificarAsignacion(incidenciaActualizada, responsableAsignado); 
+        } else {
+            console.warn("No se pudo notificar: Responsable no encontrado o le falta el campo 'email'.");
+        }
+        
         this.$emit(
           "mensajeGlobal",
           `Incidencia #${incidenciaActualizada.id} asignada a ${incidenciaActualizada.responsable.nombre} correctamente.`
@@ -221,7 +234,6 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 .modal-backdrop {
   position: fixed;

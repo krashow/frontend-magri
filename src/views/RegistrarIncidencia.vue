@@ -187,68 +187,100 @@ const observacionTexto = ref("")
 const fileInput = ref(null)
 const selectedFile = ref(null)
 
+// CAMBIO CRÍTICO: RUTA BASE COMPLETA para Despliegue en otra PC
+// Esto obliga al frontend a buscar el backend en tu PC (192.168.1.116:8081)
+const API_BASE_PATH = "http://192.168.1.116:8081/api/incidencias";
+
 
 // Logout
 const logout = () => {
-  if (window.confirm("¿Seguro que deseas cerrar sesión?")) {
-    router.push("/login")
-  }
+    if (window.confirm("¿Seguro que deseas cerrar sesión?")) {
+        router.push("/login")
+    }
 }
 const openFilePicker = () => {
-  fileInput.value.click() 
+    fileInput.value.click() 
 }
 const handleFileChange = (event) => {
-  if (event.target.files.length > 0) {
-    selectedFile.value = event.target.files[0]
-  } else {
-    selectedFile.value = null
-  }
+    if (event.target.files.length > 0) {
+        selectedFile.value = event.target.files[0]
+    } else {
+        selectedFile.value = null
+    }
 }
 const navigateTo = (path) => {
-  router.push(path)
+    router.push(path)
 }
-const cargarPreguntas = async () => {
-  try {
-    const resp = await axios.get(`http://localhost:8081/api/incidencias/preguntas/${categoriaSeleccionada.value}`)
-    preguntas.value = resp.data
-  } catch (err) {
-    console.error("Error al cargar preguntas:", err)
-    alert("No se pudieron cargar las preguntas.")
-  }
-}
-const enviarIncidencia = async () => {
-    if (!categoriaSeleccionada.value || !areaSeleccionada.value || !prioridadSeleccionada.value) {
-        alert("❌ Debe seleccionar una Categoría, un Área y una Prioridad.")
-        return
-    }
 
-    const data = {
-        idCategoria: categoriaSeleccionada.value,
-        idArea: areaSeleccionada.value, 
-        idPrioridad: prioridadSeleccionada.value,
-        observacion: observacionTexto.value, 
-        respuestas: respuestas.value
-    }
-    try {
-        const resp = await axios.post("http://localhost:8081/api/incidencias/registrar", data)
-        if (resp.data.success) {
-            alert(`✅ ${resp.data.message}`)
-            categoriaSeleccionada.value = ""
-            areaSeleccionada.value = ""
-            prioridadSeleccionada.value = ""
-            observacionTexto.value = ""
-            respuestas.value = {}
-            preguntas.value = []
-            
-            router.push("/dashboard")
-        } else {
-            alert(`❌ Error del servidor: ${resp.data.message}`)
-        }
-    } catch (err) {
-        console.error("Error al registrar incidencia:", err.response?.data || err.message)
-        alert("❌ No se pudo registrar la incidencia. Revise la consola para detalles.")
-    }
+// --- FUNCIÓN CORREGIDA: CARGAR PREGUNTAS ---
+const cargarPreguntas = async () => {
+    try {
+        // Usa la ruta COMPLETA
+        const resp = await axios.get(`${API_BASE_PATH}/preguntas/${categoriaSeleccionada.value}`)
+        preguntas.value = resp.data
+    } catch (err) {
+        console.error("Error al cargar preguntas:", err)
+        alert("No se pudieron cargar las preguntas.")
+    }
+}
+
+// --- FUNCIÓN CORREGIDA: ENVIAR INCIDENCIA (CON ARCHIVO Y FormData) ---
+const enviarIncidencia = async () => {
+    if (!categoriaSeleccionada.value || !areaSeleccionada.value || !prioridadSeleccionada.value) {
+        alert("❌ Debe seleccionar una Categoría, un Área y una Prioridad.")
+        return
+    }
+
+    // 1. Crear el objeto con los datos JSON (sin el archivo)
+    const data = {
+        idCategoria: categoriaSeleccionada.value,
+        idArea: areaSeleccionada.value, 
+        idPrioridad: prioridadSeleccionada.value,
+        observacion: observacionTexto.value, 
+        respuestas: respuestas.value
+    };
+
+    // 2. Crear FormData para enviar tanto el JSON como el Archivo
+    const formData = new FormData();
+
+    // Adjuntar los datos JSON como un string para que Spring Boot los pueda mapear
+    // Spring Boot debe esperar este campo con @RequestParam("data")
+    formData.append('data', JSON.stringify(data)); 
+
+    // Adjuntar el archivo si existe (Spring Boot debe esperar este campo con @RequestParam("file"))
+    if (selectedFile.value) {
+        formData.append('file', selectedFile.value); 
+    }
+
+    try {
+        // 3. Petición POST con ruta COMPLETA y formData
+        const resp = await axios.post(`${API_BASE_PATH}/registrar`, formData, {
+            headers: {
+                // Axios lo configura automáticamente, pero se mantiene por claridad.
+                'Content-Type': 'multipart/form-data' 
+            }
+        }); 
+
+        if (resp.data.success) {
+            alert(`✅ ${resp.data.message}`)
+            
+            // Limpiar variables del formulario
+            categoriaSeleccionada.value = ""
+            areaSeleccionada.value = ""
+            prioridadSeleccionada.value = ""
+            observacionTexto.value = ""
+            respuestas.value = {}
+            preguntas.value = []
+            selectedFile.value = null // Limpiar el archivo
+            
+            router.push("/dashboard")
+        } else {
+            alert(`❌ Error del servidor: ${resp.data.message}`)
+        }
+    } catch (err) {
+        console.error("Error al registrar incidencia:", err.response?.data || err.message)
+        alert("❌ No se pudo registrar la incidencia. Revise la consola para detalles.")
+    }
 }
 </script>
-
 <style scoped src="./Dashboard.css"></style>

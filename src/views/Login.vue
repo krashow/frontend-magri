@@ -51,20 +51,25 @@ const router = useRouter();
 const email = ref("");
 const password = ref("");
 
+// CRÍTICO: Usar la IP del Servidor Spring Boot
+const API_URL = "http://192.168.1.116:8081";
+
 const login = async () => {
-  try {
-    const response = await axios.post("http://localhost:8081/api/auth/login", {
-      email: email.value,
-      password: password.value,
-    });
-    if (response.data.success) {
-      router.push("/dashboard");
-    } else {
-      alert(response.data.message);
-    }
-  } catch (error) {
-    alert("Error al conectar con el servidor");
-    console.error(error);
-  }
+  try {
+    // Usa la variable con la IP real
+    const response = await axios.post(`${API_URL}/api/auth/login`, {
+      email: email.value,
+      password: password.value,
+    });
+    if (response.data.success) {
+      router.push("/dashboard");
+    } else {
+      alert(response.data.message);
+    }
+  } catch (error) {
+    // El error "Error al conectar con el servidor" probablemente proviene de la red.
+    alert("Error al conectar con el servidor");
+    console.error(error);
+  }
 };
 </script>
